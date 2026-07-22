@@ -687,4 +687,10 @@ dialog::backdrop { background: rgba(0, 0, 0, .68); }
     width: 100%;
     min-width: 0;
   }
+  
+  .image-size-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 }
