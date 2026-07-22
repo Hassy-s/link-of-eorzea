@@ -580,3 +580,111 @@ dialog::backdrop { background: rgba(0, 0, 0, .68); }
   .search-input { min-width: 0; }
   .link-grid { grid-template-columns: 1fr; }
 }
+
+
+/* ===== 横長モニター向け・1行ツールバー ===== */
+.content-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  min-width: 0;
+}
+
+.current-category {
+  display: flex;
+  flex: 0 1 auto;
+  align-items: center;
+  gap: .55rem;
+  min-width: 8rem;
+  max-width: 24rem;
+  padding-right: 1rem;
+  border-right: 1px solid var(--line);
+}
+
+.current-category-icon {
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-size: .9rem;
+  transform: rotate(45deg);
+}
+
+.current-category-text {
+  min-width: 0;
+}
+
+.current-category .eyebrow {
+  display: none;
+}
+
+.current-category h2 {
+  margin: 0;
+  overflow: hidden;
+  color: var(--text);
+  font-size: clamp(1.05rem, 1.35vw, 1.35rem);
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolbar-actions {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: .75rem;
+  min-width: 0;
+}
+
+.image-size-control {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.search-input {
+  flex: 1 1 24rem;
+  width: auto;
+  min-width: 12rem;
+}
+
+#addLinkButton {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 980px) {
+  .content-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .current-category {
+    max-width: none;
+    padding-right: 0;
+    padding-bottom: .75rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 680px) {
+  .toolbar-actions {
+    flex-wrap: wrap;
+  }
+
+  .image-size-control {
+    order: 1;
+  }
+
+  #addLinkButton {
+    order: 2;
+    margin-left: auto;
+  }
+
+  .search-input {
+    order: 3;
+    flex-basis: 100%;
+    width: 100%;
+    min-width: 0;
+  }
+}
