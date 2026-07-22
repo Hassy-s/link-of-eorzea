@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#10131a">
+  <title>Eorzea Link Hub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">FINAL FANTASY XIV</p>
+      <h1>Eorzea Link Hub</h1>
+      <p class="subtitle">攻略・戦闘・クラフトなどの便利なリンクを、見やすく整理できます。ジャンルの追加や並び替えは管理モードから行えます。</p>
+    </div>
+  </header>
+
+  <main class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-heading">
+        <h2>ジャンル</h2>
+        <button id="managementToggleButton" class="button compact secondary" type="button" aria-pressed="false">⚙ 管理</button>
+      </div>
+
+      <div id="managementTools" class="management-tools" hidden>
+        <button id="addCategoryButton" class="button secondary" type="button">＋ ジャンル追加</button>
+        <button id="exportButton" class="button secondary" type="button">バックアップ</button>
+        <label class="button secondary file-button">
+          復元
+          <input id="importInput" type="file" accept="application/json">
+        </label>
+      </div>
+
+      <nav id="categoryList" class="category-list" aria-label="ジャンル一覧"></nav>
+    </aside>
+
+    <section class="content">
+      <div class="content-toolbar">
+        <div>
+          <p id="currentPathLabel" class="eyebrow">FAVORITES</p>
+          <h2 id="currentCategoryName">お気に入り</h2>
+        </div>
+
+        <div class="toolbar-actions">
+          <div class="image-size-control" aria-label="画像表示サイズ">
+            <span>画像</span>
+            <button type="button" data-image-size="large">大</button>
+            <button type="button" data-image-size="small">小</button>
+            <button type="button" data-image-size="none">なし</button>
+          </div>
+          <input id="searchInput" class="search-input" type="search" placeholder="サイト名・メモ・URLを検索">
+          <button id="addLinkButton" class="button primary" type="button">サイトを追加</button>
+        </div>
+      </div>
+
+      <div id="linkList" class="link-grid"></div>
+
+      <div id="emptyState" class="empty-state" hidden>
+        <h3 id="emptyStateTitle">まだサイトがありません</h3>
+        <p id="emptyStateText">「サイトを追加」から、よく使うサイトを登録してください。</p>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="categoryDialog">
+    <form id="categoryForm" class="dialog-card">
+      <div class="dialog-heading">
+        <h2 id="categoryDialogTitle">ジャンルを追加</h2>
+        <button type="button" class="dialog-close" data-close-dialog="categoryDialog" aria-label="閉じる">×</button>
+      </div>
+      <label>ジャンル名<input id="categoryNameInput" type="text" maxlength="40" required></label>
+      <input id="editingCategoryId" type="hidden">
+      <div class="dialog-actions">
+        <button type="button" class="button secondary" data-close-dialog="categoryDialog">キャンセル</button>
+        <button type="submit" class="button primary">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="subcategoryDialog">
+    <form id="subcategoryForm" class="dialog-card">
+      <div class="dialog-heading">
+        <h2 id="subcategoryDialogTitle">サブカテゴリを追加</h2>
+        <button type="button" class="dialog-close" data-close-dialog="subcategoryDialog" aria-label="閉じる">×</button>
+      </div>
+      <label>サブカテゴリ名<input id="subcategoryNameInput" type="text" maxlength="40" required></label>
+      <input id="subcategoryCategoryId" type="hidden">
+      <input id="editingSubcategoryId" type="hidden">
+      <div class="dialog-actions">
+        <button type="button" class="button secondary" data-close-dialog="subcategoryDialog">キャンセル</button>
+        <button type="submit" class="button primary">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="linkDialog">
+    <form id="linkForm" class="dialog-card">
+      <div class="dialog-heading">
+        <h2 id="linkDialogTitle">サイトを追加</h2>
+        <button type="button" class="dialog-close" data-close-dialog="linkDialog" aria-label="閉じる">×</button>
+      </div>
+
+      <label>サイト名<input id="siteNameInput" type="text" maxlength="80" required></label>
+      <label>URL<input id="siteUrlInput" type="url" placeholder="https://example.com" required></label>
+      <label>メモ<textarea id="siteMemoInput" rows="4" maxlength="300" placeholder="用途や注意点など"></textarea></label>
+
+      <fieldset id="imageSettingsFieldset" class="image-settings">
+        <legend>画像</legend>
+        <p id="imageSettingsHelp" class="field-help">追加時はURLから自動判定します。画像設定は保存後の編集画面で変更できます。</p>
+
+        <div id="imageModeControls" class="image-mode-controls" hidden>
+          <label><input type="radio" name="imageMode" value="auto" checked> 自動</label>
+          <label><input type="radio" name="imageMode" value="custom"> 画像URL</label>
+          <label><input type="radio" name="imageMode" value="youtube"> YouTube</label>
+          <label><input type="radio" name="imageMode" value="favicon"> favicon</label>
+        </div>
+
+        <label id="customImageField" hidden>
+          画像URL
+          <input id="siteImageInput" type="url" placeholder="https://example.com/image.jpg">
+        </label>
+
+        <div id="imagePreviewPanel" class="image-preview-panel" hidden>
+          <p class="preview-label">プレビュー</p>
+          <div id="imagePreviewWrap" class="image-preview-wrap"></div>
+          <p id="imagePreviewMessage" class="preview-message"></p>
+        </div>
+      </fieldset>
+
+      <label class="checkbox-label"><input id="siteFavoriteInput" type="checkbox"><span>お気に入りにする</span></label>
+      <input id="editingLinkId" type="hidden">
+
+      <div class="dialog-actions">
+        <button type="button" class="button secondary" data-close-dialog="linkDialog">キャンセル</button>
+        <button type="submit" class="button primary">保存</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
