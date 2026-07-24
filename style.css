@@ -898,3 +898,20 @@ dialog {
   }
 }
 
+
+
+/* ===== V5.5 全ジャンル横断検索 ===== */
+.search-result-count {
+  margin: .3rem 0 0;
+  color: var(--muted);
+  font-size: .88rem;
+}
+
+.card-location {
+  margin: 0 0 .45rem;
+  color: var(--accent) !important;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  overflow-wrap: anywhere;
+}

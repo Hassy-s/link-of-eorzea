@@ -42,6 +42,7 @@
     emptyStateTitle: $('emptyStateTitle'),
     emptyStateText: $('emptyStateText'),
     currentCategoryName: $('currentCategoryName'),
+    searchResultCount: $('searchResultCount'),
     currentPathLabel: $('currentPathLabel'),
     searchInput: $('searchInput'),
     addCategoryButton: $('addCategoryButton'),
@@ -320,6 +321,22 @@
   }
 
   function renderContentHeader() {
+    const query = elements.searchInput.value.trim();
+
+    if (query) {
+      const resultCount = getVisibleEntries().length;
+      elements.currentPathLabel.textContent = 'SEARCH';
+      elements.currentCategoryName.textContent = '🔍 検索結果';
+      elements.searchResultCount.textContent = `${resultCount}件見つかりました`;
+      elements.searchResultCount.hidden = false;
+      elements.addLinkButton.hidden = true;
+      elements.addLinkButton.parentElement.hidden = true;
+      return;
+    }
+
+    elements.searchResultCount.hidden = true;
+    elements.searchResultCount.textContent = '';
+
     if (selection.type === 'favorites') {
       elements.currentPathLabel.textContent = 'FAVORITES';
       elements.currentCategoryName.textContent = 'お気に入り';
@@ -342,37 +359,47 @@
     const query = elements.searchInput.value.trim().toLowerCase();
     let entries;
 
-    if (selection.type === 'favorites') {
-      entries = allLinks().filter(entry => entry.link.favorite);
-    } else {
-      const category = getCategory(selection.categoryId);
-      const subcategory = selection.type === 'subcategory' ? getSubcategory(category, selection.subcategoryId) : null;
-      entries = (getSelectedContainer() || []).map(link => ({
-        link,
-        categoryId: selection.categoryId,
-        subcategoryId: subcategory?.id || null,
-        categoryName: category?.name || '',
-        subcategoryName: subcategory?.name || ''
-      }));
+    // 検索中は、現在開いている場所に関係なく全ジャンル・全サブカテゴリを対象にする。
+    if (query) {
+      entries = allLinks();
+      return entries.filter(({ link, categoryName, subcategoryName }) =>
+        `${link.name} ${link.url} ${link.memo} ${categoryName} ${subcategoryName}`.toLowerCase().includes(query)
+      );
     }
 
-    if (!query) return entries;
-    return entries.filter(({ link, categoryName, subcategoryName }) =>
-      `${link.name} ${link.url} ${link.memo} ${categoryName} ${subcategoryName}`.toLowerCase().includes(query)
-    );
+    if (selection.type === 'favorites') {
+      return allLinks().filter(entry => entry.link.favorite);
+    }
+
+    const category = getCategory(selection.categoryId);
+    const subcategory = selection.type === 'subcategory' ? getSubcategory(category, selection.subcategoryId) : null;
+    return (getSelectedContainer() || []).map(link => ({
+      link,
+      categoryId: selection.categoryId,
+      subcategoryId: subcategory?.id || null,
+      categoryName: category?.name || '',
+      subcategoryName: subcategory?.name || ''
+    }));
   }
 
   function renderLinks() {
     const entries = getVisibleEntries();
-    const canReorder = managementMode && selection.type !== 'favorites' && !elements.searchInput.value.trim();
+    const isSearching = Boolean(elements.searchInput.value.trim());
+    const canReorder = managementMode && selection.type !== 'favorites' && !isSearching;
 
     elements.emptyState.hidden = entries.length > 0;
-    elements.emptyStateTitle.textContent = selection.type === 'favorites' ? 'お気に入りはまだありません' : 'まだサイトがありません';
-    elements.emptyStateText.textContent = selection.type === 'favorites'
-      ? 'サイトをお気に入りにすると、ここにまとめて表示されます。'
-      : '「サイトを追加」から、よく使うサイトを登録してください。';
 
-    elements.linkList.innerHTML = entries.map(({ link, categoryId, subcategoryId }) => {
+    if (isSearching) {
+      elements.emptyStateTitle.textContent = '該当するサイトが見つかりません';
+      elements.emptyStateText.textContent = '検索語を変えて、もう一度お試しください。';
+    } else {
+      elements.emptyStateTitle.textContent = selection.type === 'favorites' ? 'お気に入りはまだありません' : 'まだサイトがありません';
+      elements.emptyStateText.textContent = selection.type === 'favorites'
+        ? 'サイトをお気に入りにすると、ここにまとめて表示されます。'
+        : '「サイトを追加」から、よく使うサイトを登録してください。';
+    }
+
+    elements.linkList.innerHTML = entries.map(({ link, categoryId, subcategoryId, categoryName, subcategoryName }) => {
       const image = resolveImage(link);
       const faviconClass = image.type === 'favicon' ? ' favicon-mode' : '';
       const imageClass = image.type === 'favicon' ? ' favicon-image' : '';
@@ -392,6 +419,7 @@
               ${image.url ? `<img class="card-image${imageClass}" src="${escapeHtml(image.url)}" alt="" loading="lazy" onerror="this.closest('.card-image-wrap').classList.add('image-error');this.remove();">` : ''}
             </div>
             <div class="card-body">
+              ${isSearching ? `<p class="card-location">${escapeHtml(subcategoryName ? `${categoryName} > ${subcategoryName}` : categoryName)}</p>` : ''}
               <h3>${escapeHtml(link.name)}</h3>
               <p class="link-memo">${escapeHtml(link.memo || 'メモなし')}</p>
             </div>
@@ -890,7 +918,7 @@
     if (selection.type !== 'favorites') openLinkDialog();
   });
 
-  elements.searchInput.addEventListener('input', renderLinks);
+  elements.searchInput.addEventListener('input', render);
 
   document.querySelectorAll('[data-image-size]').forEach(button => {
     button.addEventListener('click', () => {
