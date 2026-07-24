@@ -1,3 +1,8 @@
+/* hidden属性をレイアウト指定より常に優先する */
+[hidden] {
+  display: none !important;
+}
+
 :root {
   --bg: #10131a;
   --panel: #191e29;

@@ -317,12 +317,12 @@
     if (selection.type === 'favorites') {
       elements.currentPathLabel.textContent = 'FAVORITES';
       elements.currentCategoryName.textContent = 'お気に入り';
-      elements.addLinkButton.disabled = false;
-      elements.addLinkButton.title = '';
+      elements.addLinkButton.hidden = true;
       elements.addLinkButton.parentElement.hidden = true;
       return;
     }
 
+    elements.addLinkButton.hidden = false;
     elements.addLinkButton.parentElement.hidden = false;
     const category = getCategory(selection.categoryId);
     const subcategory = selection.type === 'subcategory' ? getSubcategory(category, selection.subcategoryId) : null;
