@@ -20,7 +20,7 @@
         links: []
       },
       { id: createId(), name: '戦闘', subcategories: [], links: [] },
-      { id: createId(), name: 'ギャザクラ, subcategories: [], links: [] },
+      { id: createId(), name: 'ギャザクラ', subcategories: [], links: [] },
       { id: createId(), name: 'ハウジング', subcategories: [], links: [] },
       { id: createId(), name: '一時保存', subcategories: [], links: [] },
       { id: createId(), name: 'SNS', subcategories: [], links: [] }
@@ -57,6 +57,14 @@
     categoryDialogTitle: $('categoryDialogTitle'),
     categoryNameInput: $('categoryNameInput'),
     editingCategoryId: $('editingCategoryId'),
+    categoryManagerDialog: $('categoryManagerDialog'),
+    categoryManagerForm: $('categoryManagerForm'),
+    managerCategoryNameInput: $('managerCategoryNameInput'),
+    managerCategoryId: $('managerCategoryId'),
+    managerSubcategoryList: $('managerSubcategoryList'),
+    managerSubcategoryEmpty: $('managerSubcategoryEmpty'),
+    managerAddSubcategoryButton: $('managerAddSubcategoryButton'),
+    managerDeleteCategoryButton: $('managerDeleteCategoryButton'),
     subcategoryDialog: $('subcategoryDialog'),
     subcategoryForm: $('subcategoryForm'),
     subcategoryDialogTitle: $('subcategoryDialogTitle'),
@@ -72,6 +80,9 @@
     siteImageInput: $('siteImageInput'),
     siteFavoriteInput: $('siteFavoriteInput'),
     editingLinkId: $('editingLinkId'),
+    linkLocationFields: $('linkLocationFields'),
+    siteCategorySelect: $('siteCategorySelect'),
+    siteSubcategorySelect: $('siteSubcategorySelect'),
     imageSettingsHelp: $('imageSettingsHelp'),
     imageModeControls: $('imageModeControls'),
     customImageField: $('customImageField'),
@@ -272,20 +283,13 @@
       const categoryAdmin = managementMode ? `
         <div class="category-actions admin-only">
           <button class="drag-handle small-icon-button" draggable="true" data-drag-type="category" data-category-id="${category.id}" aria-label="${escapeHtml(category.name)}を並び替え" title="ドラッグして並び替え">☰</button>
-          <button class="small-icon-button" data-action="add-subcategory" data-category-id="${category.id}" title="サブカテゴリ追加">＋</button>
-          <button class="small-icon-button" data-action="edit-category" data-category-id="${category.id}" title="編集">✎</button>
-          <button class="small-icon-button danger" data-action="delete-category" data-category-id="${category.id}" title="削除">×</button>
+          <button class="small-icon-button category-manage-button" data-action="manage-category" data-category-id="${category.id}" title="ジャンル管理" aria-label="${escapeHtml(category.name)}を管理">⚙</button>
         </div>` : '';
 
       const subcategoriesHtml = expanded && category.subcategories.length ? `
         <div class="subcategory-list">
           ${category.subcategories.map(subcategory => {
-            const subcategoryAdmin = managementMode ? `
-              <div class="subcategory-actions admin-only">
-                <button class="drag-handle small-icon-button" draggable="true" data-drag-type="subcategory" data-category-id="${category.id}" data-subcategory-id="${subcategory.id}" aria-label="${escapeHtml(subcategory.name)}を並び替え" title="ドラッグして並び替え">☰</button>
-                <button class="small-icon-button" data-action="edit-subcategory" data-category-id="${category.id}" data-subcategory-id="${subcategory.id}" title="編集">✎</button>
-                <button class="small-icon-button danger" data-action="delete-subcategory" data-category-id="${category.id}" data-subcategory-id="${subcategory.id}" title="削除">×</button>
-              </div>` : '';
+            const subcategoryAdmin = '';
             return `
               <div class="subcategory-row sortable-item" data-drop-type="subcategory" data-category-id="${category.id}" data-subcategory-id="${subcategory.id}">
                 <button class="subcategory-select${selection.type === 'subcategory' && selection.subcategoryId === subcategory.id ? ' active' : ''}" data-action="select-subcategory" data-category-id="${category.id}" data-subcategory-id="${subcategory.id}">${escapeHtml(subcategory.name)}</button>
@@ -437,7 +441,7 @@
     const target = event.target.closest(`[data-drop-type="${dragState.type}"]`);
     if (!target) return;
 
-    if (dragState.type === 'subcategory' && target.dataset.categoryId !== dragState.categoryId) return;
+    if (['subcategory', 'manager-subcategory'].includes(dragState.type) && target.dataset.categoryId !== dragState.categoryId) return;
     if (
       dragState.type === 'link' &&
       (target.dataset.categoryId !== dragState.categoryId ||
@@ -462,7 +466,7 @@
       changed = reorderById(data.categories, dragState.categoryId, target.dataset.categoryId);
     }
 
-    if (dragState.type === 'subcategory' && target.dataset.categoryId === dragState.categoryId) {
+    if (['subcategory', 'manager-subcategory'].includes(dragState.type) && target.dataset.categoryId === dragState.categoryId) {
       changed = reorderById(getCategory(dragState.categoryId).subcategories, dragState.subcategoryId, target.dataset.subcategoryId);
     }
 
@@ -477,6 +481,7 @@
 
     if (changed) {
       saveData();
+      if (elements.categoryManagerDialog.open) renderCategoryManager();
       render();
       showToast('並び順を変更しました');
     }
@@ -576,23 +581,8 @@
       selection = { type: 'subcategory', categoryId, subcategoryId };
     }
 
-    if (action === 'add-subcategory') openSubcategoryDialog(categoryId);
-    if (action === 'edit-category') openCategoryDialog(category);
-    if (action === 'edit-subcategory') openSubcategoryDialog(categoryId, subcategory);
+    if (action === 'manage-category') openCategoryManager(categoryId);
 
-    if (action === 'delete-category' && confirm(`「${category.name}」を削除しますか？\n登録されているサイトとサブカテゴリも削除されます。`)) {
-      data.categories = data.categories.filter(item => item.id !== categoryId);
-      selection = { type: 'favorites', categoryId: null, subcategoryId: null };
-      saveData();
-    }
-
-    if (action === 'delete-subcategory' && confirm(`「${subcategory.name}」を削除しますか？\n登録されているサイトも削除されます。`)) {
-      category.subcategories = category.subcategories.filter(item => item.id !== subcategoryId);
-      if (selection.subcategoryId === subcategoryId) {
-        selection = { type: 'category', categoryId, subcategoryId: null };
-      }
-      saveData();
-    }
 
     render();
   });
@@ -639,10 +629,52 @@
     }
   });
 
+  function renderCategoryManager() {
+    const category = getCategory(elements.managerCategoryId.value);
+    if (!category) return;
+
+    elements.managerSubcategoryEmpty.hidden = category.subcategories.length > 0;
+    elements.managerSubcategoryList.innerHTML = category.subcategories.map(subcategory => `
+      <div class="manager-subcategory-row sortable-item" data-drop-type="manager-subcategory" data-category-id="${category.id}" data-subcategory-id="${subcategory.id}">
+        <button class="manager-drag-handle drag-handle" draggable="true" data-drag-type="manager-subcategory" data-category-id="${category.id}" data-subcategory-id="${subcategory.id}" title="ドラッグして並び替え" aria-label="${escapeHtml(subcategory.name)}を並び替え">☰</button>
+        <span class="manager-subcategory-name">${escapeHtml(subcategory.name)}</span>
+        <button class="small-icon-button" type="button" data-manager-action="edit-subcategory" data-subcategory-id="${subcategory.id}" title="名前を変更">✎</button>
+        <button class="small-icon-button danger" type="button" data-manager-action="delete-subcategory" data-subcategory-id="${subcategory.id}" title="削除">×</button>
+      </div>`).join('');
+  }
+
+  function openCategoryManager(categoryId) {
+    const category = getCategory(categoryId);
+    if (!category) return;
+    elements.managerCategoryId.value = category.id;
+    elements.managerCategoryNameInput.value = category.name;
+    renderCategoryManager();
+    elements.categoryManagerDialog.showModal();
+    elements.managerCategoryNameInput.focus();
+  }
+
+  function populateLinkLocationSelects(categoryId, subcategoryId = null) {
+    elements.siteCategorySelect.innerHTML = data.categories.map(category =>
+      `<option value="${category.id}">${escapeHtml(category.name)}</option>`
+    ).join('');
+    elements.siteCategorySelect.value = categoryId;
+    updateLinkSubcategoryOptions(subcategoryId);
+  }
+
+  function updateLinkSubcategoryOptions(selectedSubcategoryId = null) {
+    const category = getCategory(elements.siteCategorySelect.value);
+    elements.siteSubcategorySelect.innerHTML = `
+      <option value="">サブカテゴリなし（ジャンル直下）</option>
+      ${(category?.subcategories || []).map(subcategory =>
+        `<option value="${subcategory.id}">${escapeHtml(subcategory.name)}</option>`
+      ).join('')}`;
+    elements.siteSubcategorySelect.value = selectedSubcategoryId || '';
+  }
+
   function openCategoryDialog(category = null) {
-    elements.categoryDialogTitle.textContent = category ? 'ジャンルを編集' : 'ジャンルを追加';
-    elements.categoryNameInput.value = category?.name || '';
-    elements.editingCategoryId.value = category?.id || '';
+    elements.categoryDialogTitle.textContent = 'ジャンルを追加';
+    elements.categoryNameInput.value = '';
+    elements.editingCategoryId.value = '';
     elements.categoryDialog.showModal();
     elements.categoryNameInput.focus();
   }
@@ -668,6 +700,8 @@
     elements.editingLinkId.value = link?.id || '';
     elements.linkDialog.dataset.categoryId = categoryId;
     elements.linkDialog.dataset.subcategoryId = subcategoryId || '';
+    elements.linkLocationFields.hidden = !isEditing;
+    if (isEditing) populateLinkLocationSelects(categoryId, subcategoryId);
 
     setSelectedImageMode(isEditing ? (link.imageMode || (link.imageUrl ? 'custom' : 'auto')) : 'auto');
     refreshImageSettingsUI();
@@ -681,9 +715,7 @@
     const name = elements.categoryNameInput.value.trim();
     if (!name) return;
 
-    const id = elements.editingCategoryId.value;
-    if (id) getCategory(id).name = name;
-    else data.categories.push({ id: createId(), name, subcategories: [], links: [] });
+    data.categories.push({ id: createId(), name, subcategories: [], links: [] });
 
     saveData();
     elements.categoryDialog.close();
@@ -704,16 +736,21 @@
     expandedCategoryIds.add(category.id);
     saveData();
     elements.subcategoryDialog.close();
+    if (elements.categoryManagerDialog.open) renderCategoryManager();
     render();
   });
 
   elements.linkForm.addEventListener('submit', event => {
     event.preventDefault();
 
-    const categoryId = elements.linkDialog.dataset.categoryId;
-    const subcategoryId = elements.linkDialog.dataset.subcategoryId || null;
+    const originalCategoryId = elements.linkDialog.dataset.categoryId;
+    const originalSubcategoryId = elements.linkDialog.dataset.subcategoryId || null;
     const editingId = elements.editingLinkId.value;
-    const { link } = findLinkLocation(categoryId, subcategoryId, editingId);
+    const originalLocation = findLinkLocation(originalCategoryId, originalSubcategoryId, editingId);
+    const link = originalLocation.link;
+
+    const categoryId = editingId ? elements.siteCategorySelect.value : originalCategoryId;
+    const subcategoryId = editingId ? (elements.siteSubcategorySelect.value || null) : originalSubcategoryId;
     const category = getCategory(categoryId);
     const targetContainer = subcategoryId ? getSubcategory(category, subcategoryId).links : category.links;
 
@@ -728,13 +765,74 @@
       updatedAt: now()
     };
 
-    if (link) Object.assign(link, values);
-    else targetContainer.push({ id: createId(), ...values, createdAt: now() });
+    if (link) {
+      Object.assign(link, values);
+      const moved = originalCategoryId !== categoryId || (originalSubcategoryId || '') !== (subcategoryId || '');
+      if (moved) {
+        const index = originalLocation.container.findIndex(item => item.id === editingId);
+        if (index >= 0) originalLocation.container.splice(index, 1);
+        targetContainer.push(link);
+      }
+    } else {
+      targetContainer.push({ id: createId(), ...values, createdAt: now() });
+    }
 
     saveData();
     elements.linkDialog.close();
     renderLinks();
   });
+
+  elements.categoryManagerForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const category = getCategory(elements.managerCategoryId.value);
+    const name = elements.managerCategoryNameInput.value.trim();
+    if (!category || !name) return;
+    category.name = name;
+    saveData();
+    elements.categoryManagerDialog.close();
+    render();
+    showToast('ジャンルを更新しました');
+  });
+
+  elements.managerAddSubcategoryButton.addEventListener('click', () => {
+    openSubcategoryDialog(elements.managerCategoryId.value);
+  });
+
+  elements.managerDeleteCategoryButton.addEventListener('click', () => {
+    const category = getCategory(elements.managerCategoryId.value);
+    if (!category) return;
+    if (!confirm(`「${category.name}」を削除しますか？\n登録されているサイトとサブカテゴリも削除されます。`)) return;
+    data.categories = data.categories.filter(item => item.id !== category.id);
+    selection = { type: 'favorites', categoryId: null, subcategoryId: null };
+    saveData();
+    elements.categoryManagerDialog.close();
+    render();
+    showToast('ジャンルを削除しました');
+  });
+
+  elements.managerSubcategoryList.addEventListener('click', event => {
+    const button = event.target.closest('[data-manager-action]');
+    if (!button) return;
+    const category = getCategory(elements.managerCategoryId.value);
+    const subcategory = getSubcategory(category, button.dataset.subcategoryId);
+    if (!subcategory) return;
+
+    if (button.dataset.managerAction === 'edit-subcategory') {
+      openSubcategoryDialog(category.id, subcategory);
+    }
+
+    if (button.dataset.managerAction === 'delete-subcategory') {
+      if (!confirm(`「${subcategory.name}」を削除しますか？\n登録されているサイトも削除されます。`)) return;
+      category.subcategories = category.subcategories.filter(item => item.id !== subcategory.id);
+      if (selection.subcategoryId === subcategory.id) selection = { type: 'category', categoryId: category.id, subcategoryId: null };
+      saveData();
+      renderCategoryManager();
+      render();
+      showToast('サブカテゴリを削除しました');
+    }
+  });
+
+  elements.siteCategorySelect.addEventListener('change', () => updateLinkSubcategoryOptions());
 
   elements.managementToggleButton.addEventListener('click', () => {
     managementMode = !managementMode;
@@ -777,6 +875,10 @@
   elements.linkList.addEventListener('dragover', handleDragOver);
   elements.linkList.addEventListener('drop', handleDrop);
   elements.linkList.addEventListener('dragend', handleDragEnd);
+  elements.managerSubcategoryList.addEventListener('dragstart', handleDragStart);
+  elements.managerSubcategoryList.addEventListener('dragover', handleDragOver);
+  elements.managerSubcategoryList.addEventListener('drop', handleDrop);
+  elements.managerSubcategoryList.addEventListener('dragend', handleDragEnd);
 
   document.querySelectorAll('[data-close-dialog]').forEach(button => {
     button.addEventListener('click', () => $(button.dataset.closeDialog).close());

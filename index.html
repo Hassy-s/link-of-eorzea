@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#10131a">
-  <title>Eorzea Link Hub V4.2</title>
+  <title>Eorzea Link Hub V5.0</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -33,7 +33,7 @@
           <p class="eyebrow">FINAL FANTASY XIV</p>
           <h1>Eorzea Link Hub</h1>
           <p class="subtitle">攻略・戦闘・クラフトなどの便利なリンクを見やすく整理できます。</p>
-          <p class="subtitle">ジャンルの追加や並び替え、サムネ変更は管理モード⚙から行えます。</p>
+          <p class="subtitle">ジャンル・サブカテゴリの管理やサイト移動は管理モード⚙から行えます。</p>
         </div>
 
         <div class="header-controls">
@@ -83,6 +83,39 @@
     </form>
   </dialog>
 
+  <dialog id="categoryManagerDialog" class="wide-dialog">
+    <form id="categoryManagerForm" class="dialog-card">
+      <div class="dialog-heading">
+        <h2>ジャンル管理</h2>
+        <button type="button" class="dialog-close" data-close-dialog="categoryManagerDialog" aria-label="閉じる">×</button>
+      </div>
+
+      <label>ジャンル名<input id="managerCategoryNameInput" type="text" maxlength="40" required></label>
+      <input id="managerCategoryId" type="hidden">
+
+      <section class="subcategory-manager-section">
+        <div class="manager-section-heading">
+          <div>
+            <h3>サブカテゴリ</h3>
+            <p>☰をつかんで上下に並び替えできます。</p>
+          </div>
+          <button id="managerAddSubcategoryButton" class="button secondary compact" type="button">＋ 新しいサブカテゴリ</button>
+        </div>
+        <div id="managerSubcategoryList" class="manager-subcategory-list"></div>
+        <p id="managerSubcategoryEmpty" class="manager-empty" hidden>サブカテゴリはまだありません。</p>
+      </section>
+
+      <div class="manager-danger-zone">
+        <button id="managerDeleteCategoryButton" class="button danger-button" type="button">このジャンルを削除</button>
+      </div>
+
+      <div class="dialog-actions">
+        <button type="button" class="button secondary" data-close-dialog="categoryManagerDialog">キャンセル</button>
+        <button type="submit" class="button primary">変更を保存</button>
+      </div>
+    </form>
+  </dialog>
+
   <dialog id="subcategoryDialog">
     <form id="subcategoryForm" class="dialog-card">
       <div class="dialog-heading">
@@ -109,6 +142,12 @@
       <label>サイト名<input id="siteNameInput" type="text" maxlength="80" required></label>
       <label>URL<input id="siteUrlInput" type="url" placeholder="https://example.com" required></label>
       <label>メモ<textarea id="siteMemoInput" rows="4" maxlength="300" placeholder="用途や注意点など"></textarea></label>
+
+      <div id="linkLocationFields" class="link-location-fields" hidden>
+        <label>ジャンル<select id="siteCategorySelect" required></select></label>
+        <label>サブカテゴリ<select id="siteSubcategorySelect"></select></label>
+        <p class="field-help">保存すると、このサイトを選択した場所へ移動します。</p>
+      </div>
 
       <fieldset id="imageSettingsFieldset" class="image-settings">
         <legend>画像</legend>
