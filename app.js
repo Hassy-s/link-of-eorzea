@@ -13,16 +13,15 @@
         id: createId(),
         name: '攻略',
         subcategories: [
-          { id: createId(), name: 'ヘビー級零式', links: [] },
           { id: createId(), name: '絶エデン', links: [] },
-          { id: createId(), name: '極ヴァリガルマンダ', links: [] }
         ],
         links: []
       },
-      { id: createId(), name: '戦闘', subcategories: [], links: [] },
+      { id: createId(), name: '戦闘/装備', subcategories: [], links: [] },
       { id: createId(), name: 'ギャザクラ', subcategories: [], links: [] },
       { id: createId(), name: 'ハウジング', subcategories: [], links: [] },
       { id: createId(), name: '一時保存', subcategories: [], links: [] },
+      { id: createId(), name: '公式関連', subcategories: [], links: [] },
       { id: createId(), name: 'SNS', subcategories: [], links: [] }
     ]
   };
