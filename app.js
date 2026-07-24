@@ -702,6 +702,10 @@
     elements.linkDialog.dataset.categoryId = categoryId;
     elements.linkDialog.dataset.subcategoryId = subcategoryId || '';
     elements.linkLocationFields.hidden = !isEditing;
+    // 追加時は非表示の移動先セレクトを無効化し、ブラウザの入力検証対象から外す。
+    // 編集時だけ有効化して、ジャンル・サブカテゴリの移動先として使用する。
+    elements.siteCategorySelect.disabled = !isEditing;
+    elements.siteSubcategorySelect.disabled = !isEditing;
     if (isEditing) populateLinkLocationSelects(categoryId, subcategoryId);
 
     setSelectedImageMode(isEditing ? (link.imageMode || (link.imageUrl ? 'custom' : 'auto')) : 'auto');
@@ -796,7 +800,6 @@
 
   elements.linkForm.addEventListener('submit', event => {
     event.preventDefault();
-    if (!elements.linkForm.reportValidity()) return;
 
     try {
       saveLinkFromDialog();
