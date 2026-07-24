@@ -20,8 +20,9 @@
         links: []
       },
       { id: createId(), name: '戦闘', subcategories: [], links: [] },
-      { id: createId(), name: 'クラフター・ギャザラー', subcategories: [], links: [] },
+      { id: createId(), name: 'ギャザクラ, subcategories: [], links: [] },
       { id: createId(), name: 'ハウジング', subcategories: [], links: [] },
+      { id: createId(), name: '一時保存', subcategories: [], links: [] },
       { id: createId(), name: 'SNS', subcategories: [], links: [] }
     ]
   };
