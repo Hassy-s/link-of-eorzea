@@ -9,11 +9,20 @@
 </head>
 <body>
   <header class="app-header">
-    <div>
+    <div class="header-text">
       <p class="eyebrow">FINAL FANTASY XIV</p>
       <h1>Eorzea Link Hub</h1>
       <p class="subtitle">攻略・戦闘・クラフトなどの便利なリンクを見やすく整理できます。</p>
       <p class="subtitle">ジャンルの追加や並び替え、サムネ変更は管理モード⚙から行えます。サムネは管理モード中に個別に変更できます。</p>
+    </div>
+
+    <div class="header-controls">
+      <div class="image-size-control" aria-label="画像表示サイズ">
+        <button type="button" data-image-size="large">サムネサイズ大</button>
+        <button type="button" data-image-size="small">小</button>
+        <button type="button" data-image-size="none">なし</button>
+      </div>
+      <input id="searchInput" class="search-input" type="search" placeholder="サイト名・メモ・URLを検索">
     </div>
   </header>
 
@@ -47,12 +56,6 @@
         </div>
 
         <div class="toolbar-actions">
-          <div class="image-size-control" aria-label="画像表示サイズ">
-            <button type="button" data-image-size="large">サムネサイズ大</button>
-            <button type="button" data-image-size="small">小</button>
-            <button type="button" data-image-size="none">なし</button>
-          </div>
-          <input id="searchInput" class="search-input" type="search" placeholder="サイト名・メモ・URLを検索">
           <button id="addLinkButton" class="button primary" type="button">サイトを追加</button>
         </div>
       </div>
