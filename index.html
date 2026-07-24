@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#10131a">
   <title>Eorzea Link Hub</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=5.4">
 </head>
 <body>
   <main class="app-shell">
@@ -17,11 +17,15 @@
 
       <div id="managementTools" class="management-tools" hidden>
         <button id="addCategoryButton" class="button secondary" type="button">＋ ジャンル追加</button>
-        <button id="exportButton" class="button secondary" type="button">バックアップ</button>
+        <button id="exportButton" class="button secondary" type="button">バックアップを作成</button>
         <label class="button secondary file-button">
-          復元
+          ファイルから復元
           <input id="importInput" type="file" accept="application/json">
         </label>
+
+        <!-- ===== テスト用：本実装時はこのボタンをコメントアウトできます ===== -->
+        <button id="resetDataButton" class="button danger-button" type="button">↺ 初期データに戻す</button>
+        <!-- ===== テスト用ここまで ===== -->
       </div>
 
       <nav id="categoryList" class="category-list" aria-label="ジャンル一覧"></nav>
@@ -182,9 +186,9 @@
     </form>
   </dialog>
 
-  <footer class="app-footer" aria-label="バージョン情報">Version 5.2</footer>
+  <footer class="app-footer" aria-label="バージョン情報">Version 5.4</footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js"></script>
+  <script src="app.js?v=5.4"></script>
 </body>
 </html>

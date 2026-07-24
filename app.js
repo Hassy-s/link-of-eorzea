@@ -50,6 +50,7 @@
     managementTools: $('managementTools'),
     exportButton: $('exportButton'),
     importInput: $('importInput'),
+    resetDataButton: $('resetDataButton'),
     toast: $('toast'),
     categoryDialog: $('categoryDialog'),
     categoryForm: $('categoryForm'),
@@ -870,6 +871,20 @@
   });
 
   elements.addCategoryButton.addEventListener('click', () => openCategoryDialog());
+
+  // ===== テスト用：本実装時はこのブロックとHTML側のボタンをコメントアウトできます =====
+  elements.resetDataButton?.addEventListener('click', () => {
+    const confirmed = confirm(
+      '保存されているデータを削除して、初期状態に戻しますか？\n\n' +
+      'バックアップを作成していない場合、元に戻すことはできません。'
+    );
+    if (!confirmed) return;
+
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(SETTINGS_KEY);
+    location.reload();
+  });
+  // ===== テスト用ここまで =====
 
   elements.addLinkButton.addEventListener('click', () => {
     if (selection.type !== 'favorites') openLinkDialog();
