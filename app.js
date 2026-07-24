@@ -317,11 +317,13 @@
     if (selection.type === 'favorites') {
       elements.currentPathLabel.textContent = 'FAVORITES';
       elements.currentCategoryName.textContent = 'お気に入り';
-      elements.addLinkButton.disabled = true;
-      elements.addLinkButton.title = 'ジャンルまたはサブカテゴリを選択してください';
+      elements.addLinkButton.disabled = false;
+      elements.addLinkButton.title = '';
+      elements.addLinkButton.parentElement.hidden = true;
       return;
     }
 
+    elements.addLinkButton.parentElement.hidden = false;
     const category = getCategory(selection.categoryId);
     const subcategory = selection.type === 'subcategory' ? getSubcategory(category, selection.subcategoryId) : null;
     elements.currentPathLabel.textContent = subcategory ? category.name : 'CATEGORY';
