@@ -33,10 +33,6 @@ button:disabled { cursor: default; opacity: .35; }
   border-bottom: 1px solid var(--line);
   background: rgba(16, 19, 26, .9);
 }
-.header-text { min-width: 0; }
-.header-controls { display: flex; flex: 1 1 auto; align-items: center; justify-content: flex-end; gap: .75rem; min-width: 0; }
-.header-controls .image-size-control { flex: 0 0 auto; white-space: nowrap; }
-.header-controls .search-input { flex: 1 1 320px; width: auto; max-width: 520px; min-width: 240px; }
 .eyebrow { margin: 0 0 .35rem; color: var(--accent); font-size: .75rem; font-weight: 700; letter-spacing: .18em; }
 h1, h2, h3, p { margin-top: 0; }
 h1 { margin-bottom: .5rem; font-size: clamp(1.8rem, 4vw, 3rem); }
@@ -127,11 +123,9 @@ dialog::backdrop { background: rgba(0, 0, 0, .68); }
 
 @media (max-width: 820px) {
   .app-header, .content-toolbar { align-items: stretch; flex-direction: column; }
-  .header-controls { width: 100%; justify-content: flex-start; flex-wrap: wrap; }
-  .header-controls .search-input { flex-basis: 100%; width: 100%; max-width: none; min-width: 0; }
   .app-layout { grid-template-columns: 1fr; }
   .sidebar { border-right: 0; border-bottom: 1px solid var(--line); }
-  .toolbar-actions { width: 100%; }
+  .toolbar-actions, .search-input { width: 100%; }
   .app-layout { min-height: auto; }
 }
 
@@ -295,6 +289,269 @@ dialog::backdrop { background: rgba(0, 0, 0, .68); }
 }
 
 
-/* ===== 常時表示のお気に入りボタン ===== */
-.card-actions .favorite-button { flex: 0 0 46px; min-width: 46px; color: var(--muted); font-size: 1.15rem; line-height: 1; }
-.card-actions .favorite-button.active, .card-actions .favorite-button:hover { color: var(--accent-strong); }
+/* ===== Eorzea Link Hub V4 layout ===== */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.workspace {
+  min-width: 0;
+}
+
+.sidebar {
+  min-height: 100vh;
+  padding: 1.5rem;
+  border-right: 1px solid var(--line);
+  background: rgba(25, 30, 41, .82);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.5rem clamp(1rem, 4vw, 3.5rem);
+  border-bottom: 1px solid var(--line);
+  background: rgba(16, 19, 26, .9);
+}
+
+.header-text {
+  min-width: 0;
+}
+
+.header-text h1 {
+  margin-bottom: .35rem;
+  font-size: clamp(1.7rem, 3vw, 2.45rem);
+}
+
+.header-text .subtitle {
+  font-size: .9rem;
+}
+
+.header-controls {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: .75rem;
+  min-width: 0;
+}
+
+.header-controls .image-size-control {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.header-controls .search-input {
+  flex: 1 1 320px;
+  width: auto;
+  max-width: 520px;
+  min-width: 240px;
+}
+
+.content {
+  padding: 1.4rem clamp(1rem, 4vw, 3.5rem) 2rem;
+}
+
+.content-toolbar {
+  align-items: center;
+  margin-bottom: 1.25rem;
+  padding-bottom: .9rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.current-category h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2vw, 1.8rem);
+}
+
+/* Keep thumbnail controls fully interactive and visually consistent. */
+.image-size-control {
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.image-size-control button {
+  min-height: 42px;
+  padding: .65rem .8rem;
+  border: 1px solid var(--line);
+  border-right-width: 0;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.image-size-control button:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+.image-size-control button:last-child {
+  border-right-width: 1px;
+  border-radius: 0 10px 10px 0;
+}
+
+.image-size-control button:hover {
+  background: var(--panel-soft);
+}
+
+.image-size-control button.active,
+.image-size-control button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #17130b;
+  font-weight: 700;
+}
+
+.card-actions .favorite-button {
+  flex: 0 0 46px;
+  min-width: 46px;
+  color: var(--muted);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.card-actions .favorite-button.active,
+.card-actions .favorite-button:hover {
+  color: var(--accent-strong);
+}
+
+@media (max-width: 980px) {
+  .app-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .header-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .header-controls .search-input {
+    max-width: none;
+  }
+}
+
+@media (max-width: 820px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+}
+
+@media (max-width: 620px) {
+  .header-controls {
+    flex-wrap: wrap;
+  }
+
+  .header-controls .search-input {
+    flex-basis: 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .content-toolbar {
+    align-items: stretch;
+  }
+
+  .toolbar-actions .button {
+    width: 100%;
+  }
+}
+
+/* ===== V4 thumbnail-size behavior fix =====
+   Keep the existing button colors; only restore the display-size behavior. */
+
+/* favicon is centered and never stretched */
+.card-image-wrap.favicon-mode {
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+}
+
+.card-image-wrap.favicon-mode .card-image,
+.card-image.favicon-image {
+  width: min(72px, 44%);
+  height: min(72px, 44%);
+  object-fit: contain !important;
+  transform: none !important;
+}
+
+/* Large: standard 16:9 thumbnail */
+.image-size-large .card-image-wrap {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto !important;
+}
+
+.image-size-large .card-image-wrap.favicon-mode {
+  display: grid;
+}
+
+/* Small: shorter thumbnail while preserving crop behavior */
+.image-size-small .card-image-wrap {
+  width: 100%;
+  aspect-ratio: auto;
+  height: 104px !important;
+}
+
+.image-size-small .card-image-wrap.favicon-mode {
+  display: grid;
+  padding: .85rem;
+}
+
+.image-size-small .card-image-wrap.favicon-mode .card-image,
+.image-size-small .card-image.favicon-image {
+  width: 54px;
+  height: 54px;
+}
+
+.image-size-small .link-card {
+  min-height: 205px;
+}
+
+/* None: remove only the thumbnail area */
+.image-size-none .card-image-wrap {
+  display: none !important;
+}
+
+.image-size-none .link-card {
+  min-height: 150px;
+}
+
+/* Keep selected/unselected thumbnail buttons using the original palette. */
+.image-size-control button {
+  background: var(--panel);
+  color: var(--text);
+}
+
+.image-size-control button:hover {
+  background: var(--panel-soft);
+  color: var(--text);
+}
+
+.image-size-control button.active,
+.image-size-control button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #17130b;
+}

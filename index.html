@@ -4,29 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#10131a">
-  <title>Eorzea Link Hub</title>
+  <title>Eorzea Link Hub V4</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="app-header">
-    <div class="header-text">
-      <p class="eyebrow">FINAL FANTASY XIV</p>
-      <h1>Eorzea Link Hub</h1>
-      <p class="subtitle">攻略・戦闘・クラフトなどの便利なリンクを見やすく整理できます。</p>
-      <p class="subtitle">ジャンルの追加や並び替え、サムネ変更は管理モード⚙から行えます。サムネは管理モード中に個別に変更できます。</p>
-    </div>
-
-    <div class="header-controls">
-      <div class="image-size-control" aria-label="画像表示サイズ">
-        <button type="button" data-image-size="large">サムネサイズ大</button>
-        <button type="button" data-image-size="small">小</button>
-        <button type="button" data-image-size="none">なし</button>
-      </div>
-      <input id="searchInput" class="search-input" type="search" placeholder="サイト名・メモ・URLを検索">
-    </div>
-  </header>
-
-  <main class="app-layout">
+  <main class="app-shell">
     <aside class="sidebar">
       <div class="sidebar-heading">
         <h2>ジャンル</h2>
@@ -45,28 +27,45 @@
       <nav id="categoryList" class="category-list" aria-label="ジャンル一覧"></nav>
     </aside>
 
-    <section class="content">
-      <div class="content-toolbar">
-        <div class="current-category">
-          <span class="current-category-icon" aria-hidden="true">▣</span>
-          <div class="current-category-text">
-            <p id="currentPathLabel" class="eyebrow">FAVORITES</p>
+    <div class="workspace">
+      <header class="app-header">
+        <div class="header-text">
+          <p class="eyebrow">FINAL FANTASY XIV</p>
+          <h1>Eorzea Link Hub</h1>
+          <p class="subtitle">攻略・戦闘・クラフトなどの便利なリンクを見やすく整理できます。</p>
+          <p class="subtitle">ジャンルの追加や並び替え、サムネ変更は管理モード⚙から行えます。</p>
+        </div>
+
+        <div class="header-controls">
+          <div class="image-size-control" aria-label="画像表示サイズ">
+            <button type="button" data-image-size="large">サムネサイズ大</button>
+            <button type="button" data-image-size="small">小</button>
+            <button type="button" data-image-size="none">なし</button>
+          </div>
+          <input id="searchInput" class="search-input" type="search" placeholder="サイト名・メモ・URLを検索">
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="content-toolbar">
+          <div class="current-category">
+            <p id="currentPathLabel" class="visually-hidden">FAVORITES</p>
             <h2 id="currentCategoryName">お気に入り</h2>
+          </div>
+
+          <div class="toolbar-actions">
+            <button id="addLinkButton" class="button primary" type="button">サイトを追加</button>
           </div>
         </div>
 
-        <div class="toolbar-actions">
-          <button id="addLinkButton" class="button primary" type="button">サイトを追加</button>
+        <div id="linkList" class="link-grid"></div>
+
+        <div id="emptyState" class="empty-state" hidden>
+          <h3 id="emptyStateTitle">まだサイトがありません</h3>
+          <p id="emptyStateText">「サイトを追加」から、よく使うサイトを登録してください。</p>
         </div>
-      </div>
-
-      <div id="linkList" class="link-grid"></div>
-
-      <div id="emptyState" class="empty-state" hidden>
-        <h3 id="emptyStateTitle">まだサイトがありません</h3>
-        <p id="emptyStateText">「サイトを追加」から、よく使うサイトを登録してください。</p>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
 
   <dialog id="categoryDialog">
