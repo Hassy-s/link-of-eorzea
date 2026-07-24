@@ -369,7 +369,7 @@
       const faviconClass = image.type === 'favicon' ? ' favicon-mode' : '';
       const imageClass = image.type === 'favicon' ? ' favicon-image' : '';
       const favoriteAction = `
-        <button class="favorite-button${link.favorite ? ' active' : ''}" data-action="toggle-favorite" data-link-id="${link.id}" data-category-id="${categoryId}" data-subcategory-id="${subcategoryId || ''}" title="${link.favorite ? 'お気に入りから外す' : 'お気に入りに追加'}" aria-label="${link.favorite ? 'お気に入りから外す' : 'お気に入りに追加'}">${link.favorite ? '★' : '☆'}</button>`;
+        <button class="favorite-button${link.favorite ? ' active' : ''}" data-action="toggle-favorite" data-link-id="${link.id}" data-category-id="${categoryId}" data-subcategory-id="${subcategoryId || ''}" title="${link.favorite ? 'お気に入りから外す' : 'お気に入りに追加'}" aria-label="${link.favorite ? 'お気に入りから外す' : 'お気に入りに追加'}" aria-pressed="${link.favorite ? 'true' : 'false'}">${link.favorite ? '★' : '☆'}</button>`;
       const adminActions = managementMode ? `
         <button data-action="edit-link" data-link-id="${link.id}" data-category-id="${categoryId}" data-subcategory-id="${subcategoryId || ''}">編集</button>
         <button class="delete-button" data-action="delete-link" data-link-id="${link.id}" data-category-id="${categoryId}" data-subcategory-id="${subcategoryId || ''}">削除</button>` : '';
