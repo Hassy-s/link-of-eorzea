@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#10131a">
-  <title>Eorzea Link Hub V5.0</title>
+  <title>Eorzea Link Hub</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -177,10 +177,12 @@
 
       <div class="dialog-actions">
         <button type="button" class="button secondary" data-close-dialog="linkDialog">キャンセル</button>
-        <button type="submit" class="button primary">保存</button>
+        <button id="linkSaveButton" type="submit" class="button primary">保存</button>
       </div>
     </form>
   </dialog>
+
+  <footer class="app-footer" aria-label="バージョン情報">Version 5.1</footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>

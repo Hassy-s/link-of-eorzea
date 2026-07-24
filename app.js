@@ -80,6 +80,7 @@
     siteImageInput: $('siteImageInput'),
     siteFavoriteInput: $('siteFavoriteInput'),
     editingLinkId: $('editingLinkId'),
+    linkSaveButton: $('linkSaveButton'),
     linkLocationFields: $('linkLocationFields'),
     siteCategorySelect: $('siteCategorySelect'),
     siteSubcategorySelect: $('siteSubcategorySelect'),
@@ -740,19 +741,28 @@
     render();
   });
 
-  elements.linkForm.addEventListener('submit', event => {
-    event.preventDefault();
-
+  function saveLinkFromDialog() {
     const originalCategoryId = elements.linkDialog.dataset.categoryId;
     const originalSubcategoryId = elements.linkDialog.dataset.subcategoryId || null;
     const editingId = elements.editingLinkId.value;
+
+    if (!originalCategoryId) {
+      alert('保存先のジャンルを取得できませんでした。いったん閉じて、ジャンルを選び直してください。');
+      return false;
+    }
+
     const originalLocation = findLinkLocation(originalCategoryId, originalSubcategoryId, editingId);
     const link = originalLocation.link;
-
     const categoryId = editingId ? elements.siteCategorySelect.value : originalCategoryId;
     const subcategoryId = editingId ? (elements.siteSubcategorySelect.value || null) : originalSubcategoryId;
     const category = getCategory(categoryId);
-    const targetContainer = subcategoryId ? getSubcategory(category, subcategoryId).links : category.links;
+    const subcategory = subcategoryId ? getSubcategory(category, subcategoryId) : null;
+    const targetContainer = subcategoryId ? subcategory?.links : category?.links;
+
+    if (!Array.isArray(targetContainer)) {
+      alert('保存先を取得できませんでした。ジャンルまたはサブカテゴリを選び直してください。');
+      return false;
+    }
 
     const imageMode = editingId ? getSelectedImageMode() : 'auto';
     const values = {
@@ -769,7 +779,7 @@
       Object.assign(link, values);
       const moved = originalCategoryId !== categoryId || (originalSubcategoryId || '') !== (subcategoryId || '');
       if (moved) {
-        const index = originalLocation.container.findIndex(item => item.id === editingId);
+        const index = originalLocation.container?.findIndex(item => item.id === editingId) ?? -1;
         if (index >= 0) originalLocation.container.splice(index, 1);
         targetContainer.push(link);
       }
@@ -779,7 +789,25 @@
 
     saveData();
     elements.linkDialog.close();
-    renderLinks();
+    render();
+    showToast(editingId ? 'サイトを更新しました' : 'サイトを保存しました');
+    return true;
+  }
+
+  elements.linkForm.addEventListener('submit', event => {
+    event.preventDefault();
+    if (!elements.linkForm.reportValidity()) return;
+
+    try {
+      saveLinkFromDialog();
+    } catch (error) {
+      console.error('サイトを保存できませんでした。', error);
+      alert('サイトを保存できませんでした。ページを再読み込みして、もう一度お試しください。');
+    }
+  });
+
+  elements.linkSaveButton?.addEventListener('click', event => {
+    event.stopPropagation();
   });
 
   elements.categoryManagerForm.addEventListener('submit', event => {
