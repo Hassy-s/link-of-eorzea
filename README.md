@@ -1,4 +1,4 @@
-# Eorzea Link Hub V3
+# Eorzea Link Hub 
 
 FF14関連サイトを、ジャンル・サブカテゴリごとに整理できる個人用リンク集です。  
 GitHub Pagesでそのまま公開できます。
@@ -9,13 +9,6 @@ GitHub Pagesでそのまま公開できます。
 - `style.css`
 - `app.js`
 
-## GitHub Pagesで使う方法
-
-1. 新しいリポジトリを作成します。
-2. このフォルダ内の3ファイルを、リポジトリの一番上にアップロードします。
-3. GitHubの `Settings` → `Pages` を開きます。
-4. `Deploy from a branch` を選びます。
-5. Branchを `main`、フォルダを `/(root)` にして保存します。
 
 ## 主な機能
 
