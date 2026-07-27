@@ -643,7 +643,7 @@
         <button data-action="edit-link" data-link-id="${link.id}" data-category-id="${categoryId}" data-subcategory-id="${subcategoryId || ''}">編集</button>
         <button class="delete-button" data-action="delete-link" data-link-id="${link.id}" data-category-id="${categoryId}" data-subcategory-id="${subcategoryId || ''}">削除</button>` : '';
       const dragHandle = canReorder ? `
-        <button class="card-drag-handle drag-handle" draggable="true" data-drag-type="link" data-category-id="${categoryId}" data-subcategory-id="${subcategoryId || ''}" data-link-id="${link.id}" aria-label="${escapeHtml(link.name)}を並び替え" title="ドラッグして並び替え">☰</button>` : '';
+        <button class="card-drag-handle drag-handle" draggable="true" data-drag-type="link" data-category-id="${categoryId}" data-subcategory-id="${subcategoryId || ''}" data-link-id="${link.id}" aria-label="${escapeHtml(link.name)}を並び替え" title="ドラッグして並び替え・別ジャンルへ移動">☰</button>` : '';
 
       return `
         <article class="link-card sortable-item" data-drop-type="link" data-category-id="${categoryId}" data-subcategory-id="${subcategoryId || ''}" data-link-id="${link.id}">
@@ -677,7 +677,109 @@
   }
 
   function clearDragStyles() {
-    document.querySelectorAll('.dragging, .drag-over').forEach(element => element.classList.remove('dragging', 'drag-over'));
+    document.body.classList.remove('link-drag-active');
+    document.querySelectorAll('.dragging, .drag-over, .drop-target-available').forEach(element => {
+      element.classList.remove('dragging', 'drag-over', 'drop-target-available');
+    });
+  }
+
+  function markLinkDropTargets() {
+    document.body.classList.add('link-drag-active');
+    elements.categoryList.querySelectorAll('[data-drop-type="category"], [data-drop-type="subcategory"]').forEach(target => {
+      target.classList.add('drop-target-available');
+    });
+  }
+
+  function getDragDropTarget(event) {
+    if (!dragState) return null;
+
+    if (dragState.type === 'link') {
+      // サイドバーでは、より具体的なサブカテゴリをジャンルより優先する。
+      const subcategoryTarget = event.target.closest('[data-drop-type="subcategory"]');
+      if (subcategoryTarget && elements.categoryList.contains(subcategoryTarget)) return subcategoryTarget;
+
+      const categoryTarget = event.target.closest('[data-drop-type="category"]');
+      if (categoryTarget && elements.categoryList.contains(categoryTarget)) return categoryTarget;
+
+      // カード同士へのドロップは、同じ保存先内での並び替えに使う。
+      const linkTarget = event.target.closest('[data-drop-type="link"]');
+      if (linkTarget && elements.linkList.contains(linkTarget)) return linkTarget;
+      return null;
+    }
+
+    return event.target.closest(`[data-drop-type="${dragState.type}"]`);
+  }
+
+  function isValidDropTarget(target) {
+    if (!target || !dragState) return false;
+
+    if (dragState.type === 'category') return target.dataset.dropType === 'category';
+
+    if (['subcategory', 'manager-subcategory'].includes(dragState.type)) {
+      return target.dataset.dropType === dragState.type && target.dataset.categoryId === dragState.categoryId;
+    }
+
+    if (dragState.type === 'link') {
+      if (target.dataset.dropType === 'link') {
+        return target.dataset.categoryId === dragState.categoryId &&
+          (target.dataset.subcategoryId || '') === (dragState.subcategoryId || '');
+      }
+      return ['category', 'subcategory'].includes(target.dataset.dropType);
+    }
+
+    return false;
+  }
+
+  function getLinkTargetLocation(target) {
+    if (target.dataset.dropType === 'subcategory') {
+      const category = getCategory(target.dataset.categoryId);
+      const subcategory = getSubcategory(category, target.dataset.subcategoryId);
+      return {
+        category,
+        subcategory,
+        container: subcategory?.links,
+        label: subcategory ? `${category.name} > ${subcategory.name}` : ''
+      };
+    }
+
+    const category = getCategory(target.dataset.categoryId);
+    return {
+      category,
+      subcategory: null,
+      container: category?.links,
+      label: category?.name || ''
+    };
+  }
+
+  function moveLinkToSidebarTarget(target) {
+    const source = findLinkLocation(dragState.categoryId, dragState.subcategoryId || null, dragState.linkId);
+    if (!source.link || !Array.isArray(source.container)) return { changed: false };
+
+    const destination = getLinkTargetLocation(target);
+    if (!destination.category || !Array.isArray(destination.container)) return { changed: false };
+
+    const sameLocation = destination.category.id === dragState.categoryId &&
+      (destination.subcategory?.id || '') === (dragState.subcategoryId || '');
+    if (sameLocation) return { changed: false, message: 'すでにこの場所に登録されています' };
+
+    const normalizedUrl = normalizeBookmarkUrl(source.link.url);
+    const duplicate = destination.container.some(link =>
+      link.id !== source.link.id && normalizeBookmarkUrl(link.url) === normalizedUrl
+    );
+    if (duplicate) return { changed: false, message: '移動先に同じURLがすでに登録されています' };
+
+    const sourceIndex = source.container.findIndex(link => link.id === source.link.id);
+    if (sourceIndex < 0) return { changed: false };
+
+    const [movedLink] = source.container.splice(sourceIndex, 1);
+    movedLink.updatedAt = now();
+    destination.container.push(movedLink);
+    if (destination.subcategory) expandedCategoryIds.add(destination.category.id);
+
+    return {
+      changed: true,
+      message: `「${movedLink.name}」を「${destination.label}」へ移動しました`
+    };
   }
 
   function handleDragStart(event) {
@@ -695,21 +797,15 @@
     };
 
     handle.closest('.sortable-item')?.classList.add('dragging');
+    if (dragState.type === 'link') markLinkDropTargets();
     event.dataTransfer.effectAllowed = 'move';
     event.dataTransfer.setData('text/plain', JSON.stringify(dragState));
   }
 
   function handleDragOver(event) {
     if (!dragState) return;
-    const target = event.target.closest(`[data-drop-type="${dragState.type}"]`);
-    if (!target) return;
-
-    if (['subcategory', 'manager-subcategory'].includes(dragState.type) && target.dataset.categoryId !== dragState.categoryId) return;
-    if (
-      dragState.type === 'link' &&
-      (target.dataset.categoryId !== dragState.categoryId ||
-        (target.dataset.subcategoryId || '') !== (dragState.subcategoryId || ''))
-    ) return;
+    const target = getDragDropTarget(event);
+    if (!isValidDropTarget(target)) return;
 
     event.preventDefault();
     event.dataTransfer.dropEffect = 'move';
@@ -719,34 +815,42 @@
 
   function handleDrop(event) {
     if (!dragState) return;
-    const target = event.target.closest(`[data-drop-type="${dragState.type}"]`);
-    if (!target) return;
+    const target = getDragDropTarget(event);
+    if (!isValidDropTarget(target)) return;
 
     event.preventDefault();
     let changed = false;
+    let message = '';
 
     if (dragState.type === 'category') {
       changed = reorderById(data.categories, dragState.categoryId, target.dataset.categoryId);
+      message = '並び順を変更しました';
     }
 
     if (['subcategory', 'manager-subcategory'].includes(dragState.type) && target.dataset.categoryId === dragState.categoryId) {
       changed = reorderById(getCategory(dragState.categoryId).subcategories, dragState.subcategoryId, target.dataset.subcategoryId);
+      message = '並び順を変更しました';
     }
 
-    if (
-      dragState.type === 'link' &&
-      target.dataset.categoryId === dragState.categoryId &&
-      (target.dataset.subcategoryId || '') === (dragState.subcategoryId || '')
-    ) {
-      const location = findLinkLocation(dragState.categoryId, dragState.subcategoryId || null, dragState.linkId);
-      changed = reorderById(location.container, dragState.linkId, target.dataset.linkId);
+    if (dragState.type === 'link') {
+      if (target.dataset.dropType === 'link') {
+        const location = findLinkLocation(dragState.categoryId, dragState.subcategoryId || null, dragState.linkId);
+        changed = reorderById(location.container, dragState.linkId, target.dataset.linkId);
+        message = '並び順を変更しました';
+      } else {
+        const result = moveLinkToSidebarTarget(target);
+        changed = result.changed;
+        message = result.message || '';
+      }
     }
 
     if (changed) {
       saveData();
       if (elements.categoryManagerDialog.open) renderCategoryManager();
       render();
-      showToast('並び順を変更しました');
+      showToast(message);
+    } else if (message) {
+      showToast(message);
     }
 
     dragState = null;

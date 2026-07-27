@@ -1030,3 +1030,68 @@ dialog {
   .bookmark-folder-row { margin-left: calc(var(--bookmark-depth) * .55rem); }
   .bookmark-folder-section .manager-section-heading { align-items: stretch; flex-direction: column; }
 }
+
+
+/* ===== V6.2 カードをジャンル／サブカテゴリへドラッグ移動 ===== */
+.link-drag-active .category-block.drop-target-available,
+.link-drag-active .subcategory-row.drop-target-available {
+  position: relative;
+  border-radius: 10px;
+  outline: 1px dashed rgba(215, 182, 111, .5);
+  outline-offset: 1px;
+}
+
+.link-drag-active .category-block.drop-target-available > .category-row,
+.link-drag-active .subcategory-row.drop-target-available {
+  background: rgba(215, 182, 111, .055);
+}
+
+.link-drag-active .category-block.drag-over,
+.link-drag-active .subcategory-row.drag-over {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  background: rgba(215, 182, 111, .14);
+  box-shadow: 0 0 0 4px rgba(215, 182, 111, .07);
+}
+
+.link-drag-active .category-block.drag-over > .category-row,
+.link-drag-active .subcategory-row.drag-over {
+  background: rgba(215, 182, 111, .14);
+}
+
+.link-drag-active .category-block.drag-over::after,
+.link-drag-active .subcategory-row.drag-over::after {
+  content: "ここに移動";
+  position: absolute;
+  z-index: 8;
+  right: .45rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: .2rem .42rem;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #17130b;
+  font-size: .68rem;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.link-drag-active .subcategory-row.drag-over::after {
+  right: .25rem;
+}
+
+.link-drag-active .category-block.drag-over .category-actions {
+  visibility: hidden;
+}
+
+.link-drag-active .subcategory-row.drag-over .subcategory-select {
+  padding-right: 5.2rem;
+}
+
+.card-drag-handle[draggable="true"] {
+  cursor: grab;
+}
+
+.card-drag-handle[draggable="true"]:active {
+  cursor: grabbing;
+}
