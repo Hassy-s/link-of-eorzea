@@ -1192,3 +1192,92 @@ dialog {
 .card-actions {
   margin-top: auto;
 }
+
+
+/* ===== V6.5 サムネイル表示モード =====
+   大（16:9）・大（正方形）・小・なしを切り替える。 */
+
+/* 大（16:9）：従来どおり横長。 */
+.image-size-large-wide .card-image-wrap,
+.image-size-large-wide .card-image-wrap.favicon-mode {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto !important;
+  padding: 0;
+  overflow: hidden;
+  background: #1b2330;
+}
+
+.image-size-large-wide .card-image-wrap:not(.favicon-mode) .card-image {
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  object-position: center;
+  transform: none;
+}
+
+.image-size-large-wide .card-image-wrap.favicon-mode .favicon-image,
+.image-size-large-wide .card-image.favicon-image {
+  width: 92% !important;
+  height: 92% !important;
+  max-width: 92% !important;
+  max-height: 92% !important;
+  object-fit: contain !important;
+  object-position: center;
+  transform: none !important;
+}
+
+/* 大（正方形）：アイコンを大きく見せる。
+   YouTubeや通常画像は全体を切らず、上下または左右に余白を作る。 */
+.image-size-large-square .card-image-wrap,
+.image-size-large-square .card-image-wrap.favicon-mode {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto !important;
+  padding: 0;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at center, rgba(215, 182, 111, .07), transparent 62%),
+    #0d1118;
+}
+
+.image-size-large-square .card-image-wrap .card-image,
+.image-size-large-square .card-image-wrap.favicon-mode .favicon-image,
+.image-size-large-square .card-image.favicon-image {
+  width: 95% !important;
+  height: 95% !important;
+  max-width: 95% !important;
+  max-height: 95% !important;
+  object-fit: contain !important;
+  object-position: center;
+  transform: none !important;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .30));
+}
+
+/* ホバー時も正方形モードでは枠外へズームさせない。 */
+.image-size-large-square .card-link:hover .card-image,
+.image-size-large-wide .card-image-wrap.favicon-mode .card-link:hover .card-image {
+  transform: none !important;
+}
+
+/* 4ボタンでもヘッダー内に収まりやすくする。 */
+.image-size-control button {
+  white-space: nowrap;
+}
+
+@media (max-width: 1180px) {
+  .header-controls {
+    flex-wrap: wrap;
+  }
+
+  .header-controls .search-input {
+    flex-basis: 100%;
+    max-width: none;
+  }
+}
