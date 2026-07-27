@@ -915,3 +915,118 @@ dialog {
   letter-spacing: .02em;
   overflow-wrap: anywhere;
 }
+
+
+/* ===== V6.1 ブラウザお気に入りインポート ===== */
+.bookmark-export-help {
+  width: fit-content;
+  max-width: 720px;
+  margin-top: .8rem;
+  color: var(--muted);
+  font-size: .84rem;
+}
+
+.bookmark-export-help summary {
+  width: fit-content;
+  color: var(--accent-strong);
+  cursor: pointer;
+  user-select: none;
+}
+
+.bookmark-export-help ol {
+  margin: .7rem 0 0 1.25rem;
+  padding: .8rem 1rem .8rem 1.7rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(16, 21, 30, .7);
+}
+
+.bookmark-export-help li + li { margin-top: .35rem; }
+
+.bookmark-import-button {
+  border-color: rgba(215, 182, 111, .55) !important;
+}
+
+.bookmark-import-dialog {
+  width: min(720px, calc(100vw - 2rem));
+}
+
+.bookmark-import-file-info {
+  display: grid;
+  gap: .25rem;
+  padding: .8rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(16, 21, 30, .55);
+}
+
+.bookmark-import-file-info span {
+  color: var(--muted);
+  font-size: .78rem;
+}
+
+.bookmark-import-file-info strong {
+  overflow-wrap: anywhere;
+}
+
+.bookmark-folder-section {
+  display: grid;
+  gap: .8rem;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(16, 21, 30, .55);
+}
+
+.bookmark-folder-tree {
+  display: grid;
+  gap: .35rem;
+  max-height: min(42vh, 420px);
+  overflow-y: auto;
+  padding-right: .25rem;
+}
+
+.bookmark-folder-row {
+  display: grid !important;
+  grid-template-columns: 20px 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: .5rem !important;
+  min-height: 42px;
+  margin-left: calc(var(--bookmark-depth) * 1rem);
+  padding: .55rem .7rem;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: var(--text) !important;
+  background: var(--panel);
+  cursor: pointer;
+}
+
+.bookmark-folder-row:hover {
+  border-color: var(--line);
+  background: var(--panel-soft);
+}
+
+.bookmark-folder-row input[type="checkbox"] {
+  width: 17px !important;
+  min-width: 17px;
+  height: 17px;
+  margin: 0;
+}
+
+.bookmark-folder-icon { color: var(--muted); }
+.bookmark-folder-name { min-width: 0; overflow-wrap: anywhere; }
+.bookmark-folder-count { color: var(--muted); font-size: .8rem; white-space: nowrap; }
+
+.bookmark-import-summary {
+  padding: .85rem 1rem;
+  border: 1px solid rgba(215, 182, 111, .38);
+  border-radius: 10px;
+  background: rgba(215, 182, 111, .08);
+  color: var(--accent-strong);
+}
+
+@media (max-width: 640px) {
+  .bookmark-export-help ol { margin-left: 0; }
+  .bookmark-folder-row { margin-left: calc(var(--bookmark-depth) * .55rem); }
+  .bookmark-folder-section .manager-section-heading { align-items: stretch; flex-direction: column; }
+}

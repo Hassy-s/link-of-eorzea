@@ -33,6 +33,7 @@
   let managementMode = false;
   let dragState = null;
   let toastTimer;
+  let bookmarkImportState = { fileName: '', folders: [], selectedIds: new Set() };
 
   const $ = id => document.getElementById(id);
   const elements = {
@@ -51,6 +52,15 @@
     managementTools: $('managementTools'),
     exportButton: $('exportButton'),
     importInput: $('importInput'),
+    bookmarkImportInput: $('bookmarkImportInput'),
+    bookmarkImportDialog: $('bookmarkImportDialog'),
+    bookmarkImportForm: $('bookmarkImportForm'),
+    bookmarkImportFileName: $('bookmarkImportFileName'),
+    bookmarkFolderTree: $('bookmarkFolderTree'),
+    bookmarkFolderEmpty: $('bookmarkFolderEmpty'),
+    bookmarkImportSummary: $('bookmarkImportSummary'),
+    bookmarkImportExecuteButton: $('bookmarkImportExecuteButton'),
+    bookmarkClearSelectionButton: $('bookmarkClearSelectionButton'),
     resetDataButton: $('resetDataButton'),
     toast: $('toast'),
     categoryDialog: $('categoryDialog'),
@@ -265,6 +275,230 @@
       button.setAttribute('aria-pressed', String(active));
     });
   }
+
+
+  function normalizeBookmarkUrl(rawUrl) {
+    try {
+      const url = new URL(String(rawUrl || '').trim());
+      url.hash = '';
+      if (url.pathname.length > 1) url.pathname = url.pathname.replace(/\/+$/, '');
+      return url.toString();
+    } catch {
+      return String(rawUrl || '').trim();
+    }
+  }
+
+  function parseBookmarkHtml(htmlText) {
+    const documentNode = new DOMParser().parseFromString(htmlText, 'text/html');
+    let folderCounter = 0;
+
+    function parseDl(dl, parentPath = []) {
+      const folders = [];
+      const children = Array.from(dl?.children || []);
+
+      for (let index = 0; index < children.length; index += 1) {
+        const element = children[index];
+        if (element.tagName !== 'DT') continue;
+
+        const heading = element.querySelector(':scope > H3');
+        const anchor = element.querySelector(':scope > A');
+
+        if (heading) {
+          let nestedDl = element.querySelector(':scope > DL');
+          if (!nestedDl) {
+            const next = children[index + 1];
+            if (next?.tagName === 'DL') {
+              nestedDl = next;
+              index += 1;
+            }
+          }
+
+          const name = heading.textContent.trim() || '名称未設定';
+          const parsedChildren = parseDl(nestedDl, [...parentPath, name]);
+          const directLinks = [];
+          Array.from(nestedDl?.children || []).forEach(child => {
+            if (child.tagName !== 'DT') return;
+            const directAnchor = child.querySelector(':scope > A');
+            if (!directAnchor?.href) return;
+            directLinks.push({
+              name: directAnchor.textContent.trim() || directAnchor.href,
+              url: directAnchor.href
+            });
+          });
+
+          folders.push({
+            id: `bookmark-folder-${folderCounter++}`,
+            name,
+            path: [...parentPath, name],
+            links: directLinks,
+            children: parsedChildren
+          });
+        } else if (anchor) {
+          // フォルダ直下のリンクは親フォルダ側で収集するため、ここでは処理しない。
+        }
+      }
+      return folders;
+    }
+
+    const rootDl = documentNode.querySelector('DL');
+    return rootDl ? parseDl(rootDl) : [];
+  }
+
+  function countBookmarkLinks(folder) {
+    return folder.links.length + folder.children.reduce((total, child) => total + countBookmarkLinks(child), 0);
+  }
+
+  function flattenBookmarkFolders(folders, parentId = null, depth = 0) {
+    return folders.flatMap(folder => [
+      { folder, parentId, depth },
+      ...flattenBookmarkFolders(folder.children, folder.id, depth + 1)
+    ]);
+  }
+
+  function renderBookmarkFolderTree() {
+    const flatFolders = flattenBookmarkFolders(bookmarkImportState.folders);
+    elements.bookmarkFolderEmpty.hidden = flatFolders.length > 0;
+    elements.bookmarkFolderTree.innerHTML = flatFolders.map(({ folder, depth }) => {
+      const count = countBookmarkLinks(folder);
+      const checked = bookmarkImportState.selectedIds.has(folder.id);
+      return `
+        <label class="bookmark-folder-row" style="--bookmark-depth:${depth}">
+          <input type="checkbox" data-bookmark-folder-id="${folder.id}" ${checked ? 'checked' : ''}>
+          <span class="bookmark-folder-icon">${folder.children.length ? '▾' : '•'}</span>
+          <span class="bookmark-folder-name">${escapeHtml(folder.name)}</span>
+          <span class="bookmark-folder-count">${count}件</span>
+        </label>`;
+    }).join('');
+    updateBookmarkImportSummary();
+  }
+
+  function getEffectiveSelectedBookmarkFolders() {
+    const flatFolders = flattenBookmarkFolders(bookmarkImportState.folders);
+    const selected = new Set(bookmarkImportState.selectedIds);
+    const byId = new Map(flatFolders.map(item => [item.folder.id, item]));
+
+    return flatFolders
+      .filter(({ folder }) => selected.has(folder.id))
+      .filter(({ parentId }) => {
+        let currentParentId = parentId;
+        while (currentParentId) {
+          if (selected.has(currentParentId)) return false;
+          currentParentId = byId.get(currentParentId)?.parentId || null;
+        }
+        return true;
+      })
+      .map(({ folder }) => folder);
+  }
+
+  function updateBookmarkImportSummary() {
+    const selectedFolders = getEffectiveSelectedBookmarkFolders();
+    const totalLinks = selectedFolders.reduce((total, folder) => total + countBookmarkLinks(folder), 0);
+    const rawSelectedCount = bookmarkImportState.selectedIds.size;
+
+    if (!rawSelectedCount) {
+      elements.bookmarkImportSummary.textContent = 'フォルダを選択してください。';
+      elements.bookmarkImportExecuteButton.disabled = true;
+      return;
+    }
+
+    elements.bookmarkImportSummary.textContent = `${selectedFolders.length}フォルダ・最大${totalLinks}件を、新しい「インポート YYYY-MM-DD」ジャンルへ取り込みます。登録済みURLは自動でスキップします。`;
+    elements.bookmarkImportExecuteButton.disabled = totalLinks === 0;
+  }
+
+  function createImportCategoryName() {
+    const date = new Date();
+    const baseName = `インポート ${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const existingNames = new Set(data.categories.map(category => category.name.trim().toLowerCase()));
+    if (!existingNames.has(baseName.toLowerCase())) return baseName;
+
+    let number = 2;
+    while (existingNames.has(`${baseName} (${number})`.toLowerCase())) number += 1;
+    return `${baseName} (${number})`;
+  }
+
+  function findOrCreateImportSubcategory(category, name) {
+    const normalizedName = name.trim().toLowerCase();
+    let subcategory = category.subcategories.find(item => item.name.trim().toLowerCase() === normalizedName);
+    if (!subcategory) {
+      subcategory = { id: createId(), name: name.trim() || '名称未設定', links: [] };
+      category.subcategories.push(subcategory);
+    }
+    return subcategory;
+  }
+
+  function createImportedLink(bookmark) {
+    return {
+      id: createId(),
+      name: String(bookmark.name || bookmark.url || '名称未設定'),
+      url: String(bookmark.url || ''),
+      memo: '',
+      imageUrl: '',
+      imageMode: 'auto',
+      favorite: false,
+      createdAt: now(),
+      updatedAt: now()
+    };
+  }
+
+  function importBookmarkFoldersIntoNewCategory(folders, existingUrls) {
+    const category = {
+      id: createId(),
+      name: createImportCategoryName(),
+      subcategories: [],
+      links: []
+    };
+    data.categories.push(category);
+
+    let added = 0;
+    let skipped = 0;
+    const includeRootFolderName = folders.length > 1;
+
+    function addLinks(target, links) {
+      links.forEach(bookmark => {
+        const normalizedUrl = normalizeBookmarkUrl(bookmark.url);
+        if (!normalizedUrl || existingUrls.has(normalizedUrl)) {
+          skipped += 1;
+          return;
+        }
+        target.push(createImportedLink(bookmark));
+        existingUrls.add(normalizedUrl);
+        added += 1;
+      });
+    }
+
+    function importFolder(folder, path = [], isSelectedRoot = false) {
+      const currentPath = isSelectedRoot && !includeRootFolderName
+        ? path
+        : [...path, folder.name];
+
+      const target = currentPath.length
+        ? findOrCreateImportSubcategory(category, currentPath.join(' > ')).links
+        : category.links;
+      addLinks(target, folder.links);
+
+      folder.children.forEach(child => importFolder(child, currentPath, false));
+    }
+
+    folders.forEach(folder => importFolder(folder, [], true));
+
+    if (!added) {
+      data.categories.splice(data.categories.findIndex(item => item.id === category.id), 1);
+      return { category: null, added, skipped };
+    }
+
+    expandedCategoryIds.add(category.id);
+    return { category, added, skipped };
+  }
+
+  function resetBookmarkImportDialog() {
+    bookmarkImportState = { fileName: '', folders: [], selectedIds: new Set() };
+    elements.bookmarkImportFileName.textContent = '未選択';
+    elements.bookmarkFolderTree.innerHTML = '';
+    elements.bookmarkFolderEmpty.hidden = true;
+    elements.bookmarkImportSummary.textContent = 'フォルダを選択してください。';
+    elements.bookmarkImportExecuteButton.disabled = true;
+  }
+
 
   function render() {
     document.body.classList.toggle('management-mode', managementMode);
@@ -1004,6 +1238,65 @@
       event.target.value = '';
     }
   });
+
+
+  elements.bookmarkImportInput.addEventListener('change', async event => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const folders = parseBookmarkHtml(await file.text());
+      bookmarkImportState = { fileName: file.name, folders, selectedIds: new Set() };
+      elements.bookmarkImportFileName.textContent = file.name;
+      renderBookmarkFolderTree();
+      elements.bookmarkImportDialog.showModal();
+    } catch (error) {
+      console.error(error);
+      alert('ブックマークHTMLを読み込めませんでした。Chromeなどから書き出したHTMLファイルを選択してください。');
+      resetBookmarkImportDialog();
+    } finally {
+      event.target.value = '';
+    }
+  });
+
+  elements.bookmarkFolderTree.addEventListener('change', event => {
+    const checkbox = event.target.closest('[data-bookmark-folder-id]');
+    if (!checkbox) return;
+    if (checkbox.checked) bookmarkImportState.selectedIds.add(checkbox.dataset.bookmarkFolderId);
+    else bookmarkImportState.selectedIds.delete(checkbox.dataset.bookmarkFolderId);
+    updateBookmarkImportSummary();
+  });
+
+  elements.bookmarkClearSelectionButton.addEventListener('click', () => {
+    bookmarkImportState.selectedIds.clear();
+    renderBookmarkFolderTree();
+  });
+
+  elements.bookmarkImportForm.addEventListener('submit', event => {
+    event.preventDefault();
+    const folders = getEffectiveSelectedBookmarkFolders();
+    if (!folders.length) return;
+
+    const totalLinks = folders.reduce((total, folder) => total + countBookmarkLinks(folder), 0);
+    if (!confirm(`${folders.length}フォルダ・最大${totalLinks}件を、新しい「インポート YYYY-MM-DD」ジャンルへ取り込みますか？\n\n同じURLがすでに登録されている場合はスキップします。`)) return;
+
+    const existingUrls = new Set(allLinks().map(({ link }) => normalizeBookmarkUrl(link.url)).filter(Boolean));
+    const result = importBookmarkFoldersIntoNewCategory(folders, existingUrls);
+
+    saveData();
+    elements.bookmarkImportDialog.close();
+    resetBookmarkImportDialog();
+
+    if (result.category) {
+      selection = { type: 'category', categoryId: result.category.id, subcategoryId: null };
+    }
+
+    render();
+    showToast(result.added
+      ? `${result.category.name}に${result.added}件取り込みました${result.skipped ? `（${result.skipped}件スキップ）` : ''}`
+      : `追加できる新しいサイトはありませんでした${result.skipped ? `（${result.skipped}件スキップ）` : ''}`);
+  });
+
 
   render();
 })();

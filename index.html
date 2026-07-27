@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#10131a">
   <title>Eorzea Link Hub</title>
-  <link rel="stylesheet" href="style.css?v=5.5">
+  <link rel="stylesheet" href="style.css?v=6.1">
 </head>
 <body>
   <main class="app-shell">
@@ -21,6 +21,10 @@
         <label class="button secondary file-button">
           ファイルから復元
           <input id="importInput" type="file" accept="application/json">
+        </label>
+        <label class="button secondary file-button bookmark-import-button">
+          ブラウザのお気に入りを取り込む
+          <input id="bookmarkImportInput" type="file" accept="text/html,.html,.htm">
         </label>
 
         <!-- ===== テスト用：本実装時はこのボタンをコメントアウトできます ===== -->
@@ -38,6 +42,15 @@
           <h1>Eorzea Link Hub</h1>
           <p class="subtitle">攻略・戦闘・クラフトなどの便利なリンクを見やすく整理できます。</p>
           <p class="subtitle">ジャンル・サブカテゴリ追加・変更、リンクのジャンル移動等は管理モードから行えます。</p>
+          <details class="bookmark-export-help">
+            <summary>Chromeのお気に入りを書き出す方法</summary>
+            <ol>
+              <li>Chrome右上の「︙」を開く</li>
+              <li>「ブックマークとリスト」→「ブックマーク マネージャ」を開く</li>
+              <li>ブックマーク マネージャ右上の「︙」→「ブックマークをエクスポート」を選ぶ</li>
+              <li>保存したHTMLファイルを、管理モードの「ブラウザのお気に入りを取り込む」から選ぶ</li>
+            </ol>
+          </details>
         </div>
 
         <div class="header-controls">
@@ -187,9 +200,47 @@
     </form>
   </dialog>
 
-  <footer class="app-footer" aria-label="バージョン情報">Version 5.5</footer>
+
+  <dialog id="bookmarkImportDialog" class="wide-dialog bookmark-import-dialog">
+    <form id="bookmarkImportForm" class="dialog-card">
+      <div class="dialog-heading">
+        <div>
+          <p class="eyebrow">BOOKMARK IMPORT</p>
+          <h2>ブラウザのお気に入りを取り込む</h2>
+        </div>
+        <button type="button" class="dialog-close" data-close-dialog="bookmarkImportDialog" aria-label="閉じる">×</button>
+      </div>
+
+      <p class="field-help">取り込みたいフォルダだけ選択できます。選択したサイトは、新しく作成される「インポート YYYY-MM-DD」ジャンルへまとめて保存されます。</p>
+      <div class="bookmark-import-file-info">
+        <span>読み込んだファイル</span>
+        <strong id="bookmarkImportFileName">未選択</strong>
+      </div>
+
+      <section class="bookmark-folder-section">
+        <div class="manager-section-heading">
+          <div>
+            <h3>取り込むフォルダ</h3>
+            <p>親フォルダを選ぶと、その中のサブフォルダとサイトもまとめて取り込みます。フォルダ構造はサブカテゴリ名として保持されます。</p>
+          </div>
+          <button id="bookmarkClearSelectionButton" class="button secondary compact" type="button">選択を解除</button>
+        </div>
+        <div id="bookmarkFolderTree" class="bookmark-folder-tree"></div>
+        <p id="bookmarkFolderEmpty" class="manager-empty" hidden>取り込めるフォルダが見つかりませんでした。</p>
+      </section>
+
+      <div id="bookmarkImportSummary" class="bookmark-import-summary" aria-live="polite">フォルダを選択してください。</div>
+
+      <div class="dialog-actions">
+        <button type="button" class="button secondary" data-close-dialog="bookmarkImportDialog">キャンセル</button>
+        <button id="bookmarkImportExecuteButton" type="submit" class="button primary" disabled>選択したフォルダを取り込む</button>
+      </div>
+    </form>
+  </dialog>
+
+  <footer class="app-footer" aria-label="バージョン情報">Version 6.1</footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="app.js?v=5.5"></script>
+  <script src="app.js?v=6.1"></script>
 </body>
 </html>
