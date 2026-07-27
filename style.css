@@ -1290,3 +1290,32 @@ dialog {
   margin-bottom:.35rem;
   font-weight:600;
 }
+
+/* ===== Version 6.6 / Release 1.0 ===== */
+
+.thumbnail-size-setting {
+  display: inline-flex;
+  align-items: center;
+  gap: .65rem;
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
+.thumbnail-size-setting .image-size-label {
+  margin: 0;
+  flex: 0 0 auto;
+}
+
+.app-footer {
+  display: grid;
+  justify-items: end;
+  gap: .1rem;
+  line-height: 1.15;
+}
+
+@media (max-width: 620px) {
+  .thumbnail-size-setting {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
