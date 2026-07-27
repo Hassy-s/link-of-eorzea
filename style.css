@@ -95,7 +95,7 @@ h1 { margin-bottom: .5rem; font-size: clamp(1.8rem, 4vw, 3rem); }
 
 .link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 1rem; }
 .link-card { display: flex; flex-direction: column; min-height: 250px; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: linear-gradient(145deg, var(--panel), #161b25); box-shadow: var(--shadow); }
-.card-image-wrap { aspect-ratio: 16 / 9; background: #0d1118; overflow: hidden; }
+.card-image-wrap { aspect-ratio: 1 / 1; background: #0d1118; overflow: hidden; }
 .card-image { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .18s ease; }
 .card-link:hover .card-image { transform: scale(1.025); }
 .card-body { display: flex; flex: 1; flex-direction: column; padding: 1rem; }
@@ -253,11 +253,11 @@ dialog::backdrop { background: rgba(0, 0, 0, .68); }
     gap: .08rem;
   }
 }
-/* ===== カード画像を16:9・比率を崩さず表示 ===== */
+/* ===== カード画像の共通表示 ===== */
 .card-image-wrap,
 .card-image-link {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 1 / 1;
   height: auto !important;
   overflow: hidden;
   background: #0d1118;
@@ -503,18 +503,6 @@ dialog::backdrop { background: rgba(0, 0, 0, .68); }
   object-position: center;
   transform: none !important;
   filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .35));
-}
-
-/* Large: standard 16:9 thumbnail */
-.image-size-large .card-image-wrap {
-  display: block;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  height: auto !important;
-}
-
-.image-size-large .card-image-wrap.favicon-mode {
-  display: grid;
 }
 
 /* Small: shorter thumbnail while preserving crop behavior */
@@ -904,7 +892,6 @@ dialog {
 }
 
 
-
 /* ===== V5.5 全ジャンル横断検索 ===== */
 .search-result-count {
   margin: .3rem 0 0;
@@ -1103,133 +1090,8 @@ dialog {
 
 
 /* ===== V6.3 faviconと通常サムネイルの表示領域を統一 ===== */
-/* 大サイズでは、YouTube画像とfaviconで同じ16:9の縦幅を使用する。 */
-.image-size-large .card-image-wrap,
-.image-size-large .card-image-wrap.favicon-mode {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  height: auto !important;
-}
-
-/* faviconは同じ領域の中央に、視認しやすいサイズで表示する。 */
-.image-size-large .card-image-wrap.favicon-mode {
-  display: grid;
-  place-items: center;
-  padding: 1rem;
-  background:
-    radial-gradient(circle at center, rgba(215, 182, 111, .08), transparent 58%),
-    #0d1118;
-}
-
-.image-size-large .card-image-wrap.favicon-mode .card-image,
-.image-size-large .card-image.favicon-image {
-  width: min(112px, 62%);
-  height: min(112px, 62%);
-  max-width: 62%;
-  max-height: 62%;
-  object-fit: contain !important;
-  transform: none !important;
-  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, .32));
-}
-
-/* 小サイズでも画像枠の高さを維持しつつ、faviconを少し大きくする。 */
-.image-size-small .card-image-wrap.favicon-mode .card-image,
-.image-size-small .card-image.favicon-image {
-  width: 68px;
-  height: 68px;
-  max-width: 70%;
-  max-height: 70%;
-}
-
-
-
-
-/* ===== V6.4.1 favicon表示復旧 =====
-   外部画像の解析は行わず、縦横比を保ってサムネ枠内に表示する。 */
-.image-size-large .card-image-wrap.favicon-mode {
-  display: grid;
-  place-items: center;
-  padding: 0;
-  overflow: hidden;
-  background: #1b2330;
-}
-
-.image-size-large .card-image-wrap.favicon-mode .favicon-image,
-.image-size-large .card-image.favicon-image {
-  width: 92% !important;
-  height: 92% !important;
-  max-width: 92% !important;
-  max-height: 92% !important;
-  object-fit: contain !important;
-  object-position: center;
-  transform: none !important;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .35));
-}
-
-/* カード下部の操作ボタン位置を揃える */
-.link-card {
-  display: flex;
-  flex-direction: column;
-}
-
-.card-link {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-height: 0;
-}
-
-.card-body {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-}
-
-.link-memo {
-  flex: 1;
-}
-
-.card-actions {
-  margin-top: auto;
-}
-
-
-/* ===== V6.5 サムネイル表示モード =====
-   大（16:9）・大（正方形）・小・なしを切り替える。 */
-
-/* 大（16:9）：従来どおり横長。 */
-.image-size-large-wide .card-image-wrap,
-.image-size-large-wide .card-image-wrap.favicon-mode {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  height: auto !important;
-  padding: 0;
-  overflow: hidden;
-  background: #1b2330;
-}
-
-.image-size-large-wide .card-image-wrap:not(.favicon-mode) .card-image {
-  width: 100% !important;
-  height: 100% !important;
-  max-width: none !important;
-  max-height: none !important;
-  object-fit: cover !important;
-  object-position: center;
-  transform: none;
-}
-
-.image-size-large-wide .card-image-wrap.favicon-mode .favicon-image,
-.image-size-large-wide .card-image.favicon-image {
-  width: 92% !important;
-  height: 92% !important;
-  max-width: 92% !important;
-  max-height: 92% !important;
-  object-fit: contain !important;
-  object-position: center;
-  transform: none !important;
-}
+/* ===== サムネイル表示モード =====
+   大（正方形）・小・なしを切り替える。 */
 
 /* 大（正方形）：アイコンを大きく見せる。
    YouTubeや通常画像は全体を切らず、上下または左右に余白を作る。 */
@@ -1261,12 +1123,11 @@ dialog {
 }
 
 /* ホバー時も正方形モードでは枠外へズームさせない。 */
-.image-size-large-square .card-link:hover .card-image,
-.image-size-large-wide .card-image-wrap.favicon-mode .card-link:hover .card-image {
+.image-size-large-square .card-link:hover .card-image {
   transform: none !important;
 }
 
-/* 4ボタンでもヘッダー内に収まりやすくする。 */
+/* サムネイル切替ボタンを折り返さない。 */
 .image-size-control button {
   white-space: nowrap;
 }
@@ -1283,14 +1144,6 @@ dialog {
 }
 
 
-/* V6.6 */
-.image-size-label{
-  font-size:.82rem;
-  color:var(--muted);
-  margin-bottom:.35rem;
-  font-weight:600;
-}
-
 /* ===== Version 6.6 / Release 1.0 ===== */
 
 .thumbnail-size-setting {
@@ -1301,9 +1154,12 @@ dialog {
   white-space: nowrap;
 }
 
-.thumbnail-size-setting .image-size-label {
-  margin: 0;
+.image-size-label {
   flex: 0 0 auto;
+  margin: 0;
+  color: var(--muted);
+  font-size: .82rem;
+  font-weight: 600;
 }
 
 .app-footer {

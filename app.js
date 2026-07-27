@@ -113,16 +113,20 @@
     return structuredClone(defaultData);
   }
 
+
+  function normalizeImageSize(value) {
+    if (value === 'large' || value === 'large-wide') return 'large-square';
+    return ['large-square', 'small', 'none'].includes(value) ? value : 'large-square';
+  }
+
   function loadSettings() {
     try {
       const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
-      if (saved?.imageSize === 'large') return { imageSize: 'large-square' };
-      if (saved?.imageSize==='large-wide') return {imageSize:'large-square'};
-      if (['large-square','small','none'].includes(saved?.imageSize)) return saved;
+      return { imageSize: normalizeImageSize(saved?.imageSize) };
     } catch (error) {
       console.warn('表示設定を読み込めませんでした。', error);
+      return { imageSize: 'large-square' };
     }
-    return { imageSize: 'large-square' };
   }
 
   function normalizeData(raw) {
@@ -271,8 +275,7 @@
 
   function applyImageSizeSetting() {
     document.body.classList.remove(
-      'image-size-large',
-            'image-size-large-square',
+      'image-size-large-square',
       'image-size-small',
       'image-size-none'
     );
@@ -1334,11 +1337,8 @@
       if (!confirm('現在のデータを、選択したバックアップで置き換えますか？')) return;
 
       data = imported;
-      if (parsed.settings?.imageSize === 'large') {
-        settings = { imageSize: 'large-wide' };
-        saveSettings();
-      } else if (['large-wide', 'large-square', 'small', 'none'].includes(parsed.settings?.imageSize)) {
-        settings = { imageSize: parsed.settings.imageSize };
+      if (parsed.settings?.imageSize) {
+        settings = { imageSize: normalizeImageSize(parsed.settings.imageSize) };
         saveSettings();
       }
 
