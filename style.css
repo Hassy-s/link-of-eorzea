@@ -494,8 +494,8 @@ dialog::backdrop { background: rgba(0, 0, 0, .68); }
 
 .card-image-wrap.favicon-mode .card-image,
 .card-image.favicon-image {
-  width: min(72px, 44%);
-  height: min(72px, 44%);
+  width: min(112px, 60%);
+  height: min(112px, 60%);
   object-fit: contain !important;
   transform: none !important;
 }
