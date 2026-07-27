@@ -1142,24 +1142,53 @@ dialog {
 }
 
 
-/* ===== V6.4 favicon content auto-fit =====
-   JavaScriptで余白を除いた内容を正方形へ収め、サムネ枠の95%以内で表示する。 */
+
+
+/* ===== V6.4.1 favicon表示復旧 =====
+   外部画像の解析は行わず、縦横比を保ってサムネ枠内に表示する。 */
 .image-size-large .card-image-wrap.favicon-mode {
+  display: grid;
+  place-items: center;
   padding: 0;
   overflow: hidden;
+  background: #1b2330;
 }
 
 .image-size-large .card-image-wrap.favicon-mode .favicon-image,
 .image-size-large .card-image.favicon-image {
-  width: 95% !important;
-  height: 95% !important;
-  max-width: 95% !important;
-  max-height: 95% !important;
+  width: 92% !important;
+  height: 92% !important;
+  max-width: 92% !important;
+  max-height: 92% !important;
   object-fit: contain !important;
   object-position: center;
   transform: none !important;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .35));
 }
 
-.image-size-large .favicon-image.favicon-auto-fitted {
-  image-rendering: auto;
+/* カード下部の操作ボタン位置を揃える */
+.link-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-link {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.link-memo {
+  flex: 1;
+}
+
+.card-actions {
+  margin-top: auto;
 }
