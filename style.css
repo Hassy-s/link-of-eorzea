@@ -1140,3 +1140,26 @@ dialog {
   max-width: 70%;
   max-height: 70%;
 }
+
+
+/* ===== V6.4 favicon content auto-fit =====
+   JavaScriptで余白を除いた内容を正方形へ収め、サムネ枠の95%以内で表示する。 */
+.image-size-large .card-image-wrap.favicon-mode {
+  padding: 0;
+  overflow: hidden;
+}
+
+.image-size-large .card-image-wrap.favicon-mode .favicon-image,
+.image-size-large .card-image.favicon-image {
+  width: 95% !important;
+  height: 95% !important;
+  max-width: 95% !important;
+  max-height: 95% !important;
+  object-fit: contain !important;
+  object-position: center;
+  transform: none !important;
+}
+
+.image-size-large .favicon-image.favicon-auto-fitted {
+  image-rendering: auto;
+}
