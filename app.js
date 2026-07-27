@@ -116,12 +116,13 @@
   function loadSettings() {
     try {
       const saved = JSON.parse(localStorage.getItem(SETTINGS_KEY));
-      if (saved?.imageSize === 'large') return { imageSize: 'large-wide' };
-      if (['large-wide', 'large-square', 'small', 'none'].includes(saved?.imageSize)) return saved;
+      if (saved?.imageSize === 'large') return { imageSize: 'large-square' };
+      if (saved?.imageSize==='large-wide') return {imageSize:'large-square'};
+      if (['large-square','small','none'].includes(saved?.imageSize)) return saved;
     } catch (error) {
       console.warn('表示設定を読み込めませんでした。', error);
     }
-    return { imageSize: 'large-wide' };
+    return { imageSize: 'large-square' };
   }
 
   function normalizeData(raw) {
@@ -271,8 +272,7 @@
   function applyImageSizeSetting() {
     document.body.classList.remove(
       'image-size-large',
-      'image-size-large-wide',
-      'image-size-large-square',
+            'image-size-large-square',
       'image-size-small',
       'image-size-none'
     );

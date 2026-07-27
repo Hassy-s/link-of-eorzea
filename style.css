@@ -1281,3 +1281,12 @@ dialog {
     max-width: none;
   }
 }
+
+
+/* V6.6 */
+.image-size-label{
+  font-size:.82rem;
+  color:var(--muted);
+  margin-bottom:.35rem;
+  font-weight:600;
+}
