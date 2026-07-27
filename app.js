@@ -230,7 +230,7 @@
   function getFaviconUrl(rawUrl) {
     try {
       const url = new URL(rawUrl);
-      return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(url.hostname)}&sz=128`;
+      return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(url.hostname)}&sz=256`;
     } catch {
       return '';
     }

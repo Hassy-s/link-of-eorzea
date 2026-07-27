@@ -489,15 +489,20 @@ dialog::backdrop { background: rgba(0, 0, 0, .68); }
 .card-image-wrap.favicon-mode {
   display: grid;
   place-items: center;
-  padding: 1.25rem;
+  padding: 0;
+  background: #1b2330;
 }
 
 .card-image-wrap.favicon-mode .card-image,
 .card-image.favicon-image {
-  width: min(72px, 44%);
-  height: min(72px, 44%);
+  width: 92% !important;
+  height: 92% !important;
+  max-width: none !important;
+  max-height: none !important;
   object-fit: contain !important;
+  object-position: center;
   transform: none !important;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, .35));
 }
 
 /* Large: standard 16:9 thumbnail */
@@ -526,8 +531,8 @@ dialog::backdrop { background: rgba(0, 0, 0, .68); }
 
 .image-size-small .card-image-wrap.favicon-mode .card-image,
 .image-size-small .card-image.favicon-image {
-  width: 54px;
-  height: 54px;
+  width: 54px !important;
+  height: 54px !important;
 }
 
 .image-size-small .link-card {
